@@ -13,19 +13,14 @@ const TechnicianAssignment = () => {
   const [assigningId, setAssigningId] = useState<number | null>(null);
 
   const canAssign =
-    user?.role === "SUPER_ADMIN" ||
-    user?.role === "BRANCH_ADMIN" ||
-    user?.role === "RECEPTIONIST";
+    user?.role === "SUPER_ADMIN" || user?.role === "BRANCH_ADMIN" || user?.role === "RECEPTIONIST";
 
   const loadData = async () => {
     try {
       setLoading(true);
-      const [bRes, tRes] = await Promise.all([
-        getUnassignedBookings(),
-        getTechnicians(),
-      ]);
-      setBookings(bRes.data);
-      setTechnicians(tRes.data);
+      const [bRes, tRes] = await Promise.all([getUnassignedBookings(), getTechnicians()]);
+      setBookings(bRes.data.data);
+      setTechnicians(tRes.data.data);
     } catch {
       toast.error("Failed to load data");
     } finally {
@@ -59,13 +54,24 @@ const TechnicianAssignment = () => {
         <div className="flex items-center justify-center min-h-[400px]">
           <div className="rounded-xl border border-red-200 bg-red-50 p-6 dark:border-red-900/30 dark:bg-red-900/10 max-w-md">
             <div className="flex items-center gap-3 mb-2">
-              <svg className="w-6 h-6 text-red-600 dark:text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4v.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              <svg
+                className="w-6 h-6 text-red-600 dark:text-red-400"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M12 8v4m0 4v.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                />
               </svg>
               <h3 className="font-semibold text-red-800 dark:text-red-400">Access Denied</h3>
             </div>
             <p className="text-sm text-red-700 dark:text-red-300">
-              You don't have permission to access this page. Only administrators and receptionists can assign technicians.
+              You don't have permission to access this page. Only administrators and receptionists
+              can assign technicians.
             </p>
           </div>
         </div>
@@ -75,7 +81,10 @@ const TechnicianAssignment = () => {
 
   return (
     <>
-      <PageMeta title="Technician Assignment" description="Assign technicians to pending bookings" />
+      <PageMeta
+        title="Technician Assignment"
+        description="Assign technicians to pending bookings"
+      />
       <div className="space-y-6">
         {/* Page Header */}
         <div>
@@ -92,8 +101,18 @@ const TechnicianAssignment = () => {
           <div className="flex items-center justify-center min-h-[300px]">
             <div className="text-center">
               <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-blue-100 dark:bg-blue-900/30 mb-4">
-                <svg className="w-6 h-6 text-blue-600 dark:text-blue-400 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                <svg
+                  className="w-6 h-6 text-blue-600 dark:text-blue-400 animate-spin"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
+                  />
                 </svg>
               </div>
               <p className="text-gray-600 dark:text-gray-400">Loading pending bookings...</p>
@@ -108,13 +127,26 @@ const TechnicianAssignment = () => {
               <div className="flex items-center justify-center min-h-[400px]">
                 <div className="rounded-xl border border-gray-200 bg-white p-8 dark:border-gray-800 dark:bg-white/[0.03] text-center max-w-md">
                   <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-gray-100 dark:bg-gray-800/50 mb-4">
-                    <svg className="w-8 h-8 text-gray-400 dark:text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    <svg
+                      className="w-8 h-8 text-gray-400 dark:text-gray-600"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={1.5}
+                        d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+                      />
                     </svg>
                   </div>
-                  <h3 className="font-semibold text-gray-900 dark:text-white mb-2">No Pending Assignments</h3>
+                  <h3 className="font-semibold text-gray-900 dark:text-white mb-2">
+                    No Pending Assignments
+                  </h3>
                   <p className="text-sm text-gray-600 dark:text-gray-400">
-                    All bookings have been assigned to technicians. Check back later for new pending assignments.
+                    All bookings have been assigned to technicians. Check back later for new pending
+                    assignments.
                   </p>
                 </div>
               </div>
@@ -126,16 +158,24 @@ const TechnicianAssignment = () => {
                     <thead>
                       <tr className="border-b border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-900/20">
                         <th className="px-6 py-4 text-left">
-                          <p className="text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider">Booking ID</p>
+                          <p className="text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider">
+                            Booking ID
+                          </p>
                         </th>
                         <th className="px-6 py-4 text-left">
-                          <p className="text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider">Customer</p>
+                          <p className="text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider">
+                            Customer
+                          </p>
                         </th>
                         <th className="px-6 py-4 text-left">
-                          <p className="text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider">Scheduled Date</p>
+                          <p className="text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider">
+                            Scheduled Date
+                          </p>
                         </th>
                         <th className="px-6 py-4 text-left">
-                          <p className="text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider">Assign Technician</p>
+                          <p className="text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider">
+                            Assign Technician
+                          </p>
                         </th>
                       </tr>
                     </thead>
@@ -193,7 +233,7 @@ const TechnicianAssignment = () => {
                                 backgroundPosition: "right 0.5rem center",
                                 backgroundRepeat: "no-repeat",
                                 backgroundSize: "1.5em 1.5em",
-                                paddingRight: "2.5rem"
+                                paddingRight: "2.5rem",
                               }}
                             >
                               <option value="" disabled>
@@ -215,7 +255,8 @@ const TechnicianAssignment = () => {
                 {/* Table Footer */}
                 <div className="border-t border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-900/20 px-6 py-4">
                   <p className="text-xs text-gray-600 dark:text-gray-400">
-                    Showing <span className="font-semibold">{bookings.length}</span> pending assignment{bookings.length !== 1 ? "s" : ""}
+                    Showing <span className="font-semibold">{bookings.length}</span> pending
+                    assignment{bookings.length !== 1 ? "s" : ""}
                   </p>
                 </div>
               </div>

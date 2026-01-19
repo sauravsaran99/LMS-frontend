@@ -12,7 +12,8 @@ export const createCustomer = (payload: {
   base_branch_id?: number;
 }) => api.post("/customers", payload);
 
-export const getCustomers = () => api.get("/customers");
+export const getCustomers = (params?: { page?: number; limit?: number }) =>
+  api.get("/customers", { params });
 
 export const updateCustomer = (id: number, data: any) => api.put(`/customers/${id}`, data);
 

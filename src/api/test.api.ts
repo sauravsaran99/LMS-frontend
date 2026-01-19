@@ -1,14 +1,14 @@
 import api from "./axios";
 import { Test } from "../types/test";
 
-export const getTests = () =>
-    api.get<Test[]>("/tests");
+export const getTests = (params?: { page?: number; limit?: number }) =>
+  api.get<{ data: Test[]; total: number; page: number; limit: number; hasMore: boolean }>(
+    "/tests",
+    { params }
+  );
 
-export const createTest = (payload: {
-    name: string;
-    category: string;
-    price: number;
-}) => api.post("/tests", payload);
+export const createTest = (payload: { name: string; category: string; price: number }) =>
+  api.post("/tests", payload);
 
 export const updateTest = (
   id: number,
@@ -19,5 +19,4 @@ export const updateTest = (
   }
 ) => api.put(`/tests/${id}`, data);
 
-export const deleteTest = (id: number) =>
-  api.delete(`/tests/${id}`);
+export const deleteTest = (id: number) => api.delete(`/tests/${id}`);

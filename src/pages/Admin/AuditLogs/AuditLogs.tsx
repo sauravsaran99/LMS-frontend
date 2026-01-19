@@ -1,24 +1,34 @@
 import { useEffect, useState } from "react";
+import { useSearchParams } from "react-router-dom";
 import { getAuditLogs } from "../../../api/auditLog.api";
 import toast from "react-hot-toast";
 import PageMeta from "../../../components/common/PageMeta";
 
 const AuditLogs = () => {
+  const [searchParams, setSearchParams] = useSearchParams();
   const [logs, setLogs] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
   const [fromDate, setFromDate] = useState("");
   const [toDate, setToDate] = useState("");
   const [entity, setEntity] = useState("");
+  const [totalLogs, setTotalLogs] = useState(0);
 
-  const fetchLogs = async () => {
+  const page = parseInt(searchParams.get("page") || "1");
+  const limit = parseInt(searchParams.get("limit") || "10");
+
+  const fetchLogs = async (pageNum: number = 1, lim: number = 10) => {
     try {
       setLoading(true);
       const res = await getAuditLogs({
+        page: pageNum,
+        limit: lim,
         from_date: fromDate,
         to_date: toDate,
         entity,
       });
-      setLogs(res.data);
+      setLogs(res.data.data || res.data);
+      setTotalLogs(res.data.total || res.data.length);
+      setSearchParams({ page: pageNum.toString(), limit: lim.toString() });
     } catch {
       toast.error("Failed to load audit logs");
     } finally {
@@ -27,7 +37,7 @@ const AuditLogs = () => {
   };
 
   useEffect(() => {
-    fetchLogs();
+    fetchLogs(page, limit);
   }, []);
 
   return (
@@ -36,9 +46,7 @@ const AuditLogs = () => {
       <div className="space-y-6">
         {/* Page Header */}
         <div>
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
-            Audit Logs
-          </h1>
+          <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Audit Logs</h1>
           <p className="text-gray-600 dark:text-gray-400 mt-1">
             Track all system activities and data changes
           </p>
@@ -48,13 +56,21 @@ const AuditLogs = () => {
         <div className="rounded-2xl border border-gray-200 bg-white p-6 dark:border-gray-800 dark:bg-white/[0.03] shadow-sm">
           <div className="flex items-center gap-3 mb-6">
             <div className="flex items-center justify-center w-10 h-10 rounded-lg bg-blue-100 dark:bg-blue-900/30">
-              <svg className="w-6 h-6 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
+              <svg
+                className="w-6 h-6 text-blue-600 dark:text-blue-400"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"
+                />
               </svg>
             </div>
-            <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
-              Filter Logs
-            </h2>
+            <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Filter Logs</h2>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -105,14 +121,24 @@ const AuditLogs = () => {
             {/* Apply Button */}
             <div className="flex items-end">
               <button
-                onClick={fetchLogs}
+                onClick={() => fetchLogs(1, limit)}
                 disabled={loading}
                 className="w-full rounded-lg bg-gradient-to-r from-blue-600 to-blue-700 px-6 py-2.5 text-sm font-medium text-white transition-all hover:shadow-lg hover:from-blue-700 hover:to-blue-800 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {loading ? (
                   <span className="flex items-center justify-center gap-2">
-                    <svg className="w-4 h-4 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                    <svg
+                      className="w-4 h-4 animate-spin"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
+                      />
                     </svg>
                     Loading...
                   </span>
@@ -159,7 +185,10 @@ const AuditLogs = () => {
 
               <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
                 {logs.map((log) => (
-                  <tr key={log.id} className="hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors">
+                  <tr
+                    key={log.id}
+                    className="hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors"
+                  >
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white font-medium">
                       {new Date(log.created_at).toLocaleString()}
                     </td>
@@ -180,13 +209,15 @@ const AuditLogs = () => {
                       </span>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm">
-                      <span className={`inline-flex items-center rounded-full px-3 py-1 text-sm font-medium ${
-                        log.action_type === "CREATE"
-                          ? "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300"
-                          : log.action_type === "UPDATE"
-                          ? "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300"
-                          : "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300"
-                      }`}>
+                      <span
+                        className={`inline-flex items-center rounded-full px-3 py-1 text-sm font-medium ${
+                          log.action_type === "CREATE"
+                            ? "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300"
+                            : log.action_type === "UPDATE"
+                              ? "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300"
+                              : "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300"
+                        }`}
+                      >
                         {log.action_type}
                       </span>
                     </td>
@@ -217,12 +248,20 @@ const AuditLogs = () => {
                   <tr>
                     <td colSpan={8} className="text-center py-12">
                       <div className="flex flex-col items-center justify-center">
-                        <svg className="w-12 h-12 text-gray-400 dark:text-gray-600 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                        <svg
+                          className="w-12 h-12 text-gray-400 dark:text-gray-600 mb-4"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={1.5}
+                            d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                          />
                         </svg>
-                        <p className="text-gray-500 dark:text-gray-400">
-                          No audit logs found
-                        </p>
+                        <p className="text-gray-500 dark:text-gray-400">No audit logs found</p>
                       </div>
                     </td>
                   </tr>
@@ -234,10 +273,95 @@ const AuditLogs = () => {
           {loading && (
             <div className="flex items-center justify-center py-12">
               <div className="flex flex-col items-center gap-3">
-                <svg className="w-8 h-8 text-blue-600 dark:text-blue-400 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                <svg
+                  className="w-8 h-8 text-blue-600 dark:text-blue-400 animate-spin"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
+                  />
                 </svg>
                 <p className="text-gray-600 dark:text-gray-400 text-sm">Loading audit logs...</p>
+              </div>
+            </div>
+          )}
+
+          {/* Pagination Controls */}
+          {!loading && logs.length > 0 && (
+            <div className="flex items-center justify-between px-6 py-4 border-t border-gray-200 dark:border-gray-700">
+              <div className="text-sm text-gray-600 dark:text-gray-400">
+                Showing <span className="font-medium">{(page - 1) * limit + 1}</span> to{" "}
+                <span className="font-medium">{Math.min(page * limit, totalLogs)}</span> of{" "}
+                <span className="font-medium">{totalLogs}</span> logs
+              </div>
+
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => fetchLogs(page - 1, limit)}
+                  disabled={page === 1 || loading}
+                  className="rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 transition-all hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700"
+                >
+                  Previous
+                </button>
+
+                <div className="flex items-center gap-1">
+                  {Array.from({ length: Math.ceil(totalLogs / limit) }).map((_, index) => {
+                    const pageNum = index + 1;
+                    if (
+                      pageNum === 1 ||
+                      pageNum === Math.ceil(totalLogs / limit) ||
+                      (pageNum >= page - 1 && pageNum <= page + 1)
+                    ) {
+                      return (
+                        <button
+                          key={pageNum}
+                          onClick={() => fetchLogs(pageNum, limit)}
+                          className={`rounded-lg px-3 py-2 text-sm font-medium transition-all ${
+                            pageNum === page
+                              ? "bg-blue-600 text-white dark:bg-blue-700"
+                              : "border border-gray-300 bg-white text-gray-700 hover:bg-gray-50 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700"
+                          }`}
+                        >
+                          {pageNum}
+                        </button>
+                      );
+                    } else if (
+                      (pageNum === page - 2 && page > 3) ||
+                      (pageNum === page + 2 && page < Math.ceil(totalLogs / limit) - 2)
+                    ) {
+                      return (
+                        <span key={pageNum} className="px-2 text-gray-500">
+                          ...
+                        </span>
+                      );
+                    }
+                    return null;
+                  })}
+                </div>
+
+                <button
+                  onClick={() => fetchLogs(page + 1, limit)}
+                  disabled={page >= Math.ceil(totalLogs / limit) || loading}
+                  className="rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 transition-all hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700"
+                >
+                  Next
+                </button>
+
+                <select
+                  value={limit}
+                  onChange={(e) => fetchLogs(1, parseInt(e.target.value))}
+                  className="rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm font-medium text-gray-700 transition-all hover:border-gray-400 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-100 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300 dark:focus:ring-blue-900/50"
+                >
+                  <option value="5">5 per page</option>
+                  <option value="10">10 per page</option>
+                  <option value="20">20 per page</option>
+                  <option value="50">50 per page</option>
+                </select>
               </div>
             </div>
           )}

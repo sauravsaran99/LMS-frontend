@@ -1,6 +1,8 @@
 import api from "./axios";
 
 export const getAuditLogs = (params: {
+  page?: number;
+  limit?: number;
   from_date?: string;
   to_date?: string;
   action?: string;

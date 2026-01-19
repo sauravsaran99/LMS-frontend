@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef, useCallback } from "react";
 import { searchCustomers, getTests, previewDiscount, createBooking } from "../../api/booking.api";
 import { Customer, Test, DiscountPreview } from "../../types/booking";
 import toast from "react-hot-toast";
@@ -14,6 +14,11 @@ const Bookings = () => {
 
   const [tests, setTests] = useState<Test[]>([]);
   const [selectedTests, setSelectedTests] = useState<number[]>([]);
+  const [testPage, setTestPage] = useState(1);
+  const [testHasMore, setTestHasMore] = useState(true);
+  const [testIsLoadingMore, setTestIsLoadingMore] = useState(false);
+  const testObserverTarget = useRef<HTMLDivElement>(null);
+  const testLimit = 10;
 
   const [discountType, setDiscountType] = useState("");
   const [discountValue, setDiscountValue] = useState<number>(0);
@@ -28,13 +33,82 @@ const Bookings = () => {
   const [showPaymentModal, setShowPaymentModal] = useState(false);
   const [bookingNumber, setBookingNumber] = useState<string | null>(null);
 
+  const loadTests = useCallback(
+    async (page: number = 1, isInfinite: boolean = false) => {
+      try {
+        if (isInfinite) {
+          setTestIsLoadingMore(true);
+        } else {
+          setLoading(true);
+        }
+        const res = await getTests({ page, limit: testLimit });
+        console.log("Tests API Response:", res.data);
+
+        let newTests: Test[] = [];
+        if (Array.isArray(res.data)) {
+          newTests = res.data;
+        } else if (res.data?.data && Array.isArray(res.data.data)) {
+          newTests = res.data.data;
+        }
+
+        console.log(`Page ${page}: Got ${newTests.length} tests`);
+        const shouldHaveMore = newTests.length === testLimit;
+
+        if (isInfinite) {
+          setTests((prev) => [...prev, ...newTests]);
+        } else {
+          setTests(newTests);
+        }
+
+        setTestPage(page);
+        setTestHasMore(shouldHaveMore);
+      } catch (error) {
+        console.error("Failed to load tests:", error);
+        if (!isInfinite) {
+          toast.error("Failed to load tests");
+        }
+      } finally {
+        if (isInfinite) {
+          setTestIsLoadingMore(false);
+        } else {
+          setLoading(false);
+        }
+      }
+    },
+    [testLimit]
+  );
+
   useEffect(() => {
-    getTests().then((res) => setTests(res.data));
-  }, []);
+    loadTests(1, false);
+  }, [loadTests]);
+
+  // Intersection Observer for tests infinite scroll
+  useEffect(() => {
+    if (!testObserverTarget.current || !testHasMore) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        const entry = entries[0];
+        if (entry.isIntersecting && testHasMore && !testIsLoadingMore && !loading) {
+          loadTests(testPage + 1, true);
+        }
+      },
+      {
+        threshold: 0.01,
+        rootMargin: "100px",
+      }
+    );
+
+    observer.observe(testObserverTarget.current);
+
+    return () => {
+      observer.disconnect();
+    };
+  }, [testHasMore, testIsLoadingMore, loading, testPage, loadTests]);
 
   const handleCustomerSearch = async () => {
     const res = await searchCustomers(query);
-    setCustomers(res.data);
+    setCustomers(res.data.data);
   };
 
   const handleTestToggle = (id: number) => {
@@ -268,27 +342,51 @@ const Bookings = () => {
                     Loading tests...
                   </p>
                 ) : (
-                  tests.map((test) => (
-                    <label
-                      key={test.id}
-                      className="flex items-center gap-3 p-2 sm:p-3 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors cursor-pointer border border-transparent hover:border-gray-200 dark:hover:border-gray-700"
-                    >
-                      <input
-                        type="checkbox"
-                        checked={selectedTests.includes(test.id)}
-                        onChange={() => handleTestToggle(test.id)}
-                        className="w-4 h-4 rounded cursor-pointer accent-blue-600 flex-shrink-0"
-                      />
-                      <div className="flex-1 min-w-0">
-                        <p className="font-medium text-gray-900 dark:text-white text-sm sm:text-base truncate">
-                          {test.name}
+                  <>
+                    {tests.map((test) => (
+                      <label
+                        key={test.id}
+                        className="flex items-center gap-3 p-2 sm:p-3 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors cursor-pointer border border-transparent hover:border-gray-200 dark:hover:border-gray-700"
+                      >
+                        <input
+                          type="checkbox"
+                          checked={selectedTests.includes(test.id)}
+                          onChange={() => handleTestToggle(test.id)}
+                          className="w-4 h-4 rounded cursor-pointer accent-blue-600 flex-shrink-0"
+                        />
+                        <div className="flex-1 min-w-0">
+                          <p className="font-medium text-gray-900 dark:text-white text-sm sm:text-base truncate">
+                            {test.name}
+                          </p>
+                        </div>
+                        <span className="text-xs sm:text-sm font-semibold text-blue-600 dark:text-blue-400 whitespace-nowrap flex-shrink-0">
+                          ₹{test.price}
+                        </span>
+                      </label>
+                    ))}
+
+                    {/* Infinite Scroll Loading Indicator */}
+                    {testIsLoadingMore && (
+                      <div className="flex items-center justify-center py-3">
+                        <div className="w-4 h-4 border-2 border-blue-200 border-t-blue-600 rounded-full animate-spin dark:border-gray-700 dark:border-t-blue-400"></div>
+                        <span className="ml-2 text-xs sm:text-sm text-gray-600 dark:text-gray-400">
+                          Loading more tests...
+                        </span>
+                      </div>
+                    )}
+
+                    {/* Observer target for infinite scroll */}
+                    <div ref={testObserverTarget} className="h-1" />
+
+                    {/* End of list message */}
+                    {!testHasMore && tests.length > 0 && (
+                      <div className="flex items-center justify-center py-3">
+                        <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400">
+                          No more tests to load
                         </p>
                       </div>
-                      <span className="text-xs sm:text-sm font-semibold text-blue-600 dark:text-blue-400 whitespace-nowrap flex-shrink-0">
-                        ₹{test.price}
-                      </span>
-                    </label>
-                  ))
+                    )}
+                  </>
                 )}
               </div>
             </div>

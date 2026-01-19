@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef, useCallback } from "react";
 import toast from "react-hot-toast";
 import PageMeta from "../../components/common/PageMeta";
 import CreatePaymentModal from "./CreatePaymentModal";
@@ -7,57 +7,121 @@ import RefundModal from "./RefundModal";
 
 const Payments = () => {
   const [bookings, setBookings] = useState<any[]>([]);
+  const [paymentPage, setPaymentPage] = useState(1);
+  const [paymentHasMore, setPaymentHasMore] = useState(true);
+  const [paymentIsLoadingMore, setPaymentIsLoadingMore] = useState(false);
+  const paymentObserverTarget = useRef<HTMLDivElement>(null);
+  const paymentLimit = 10;
+  console.log("bookings", bookings);
   const [loading, setLoading] = useState(false);
   const [openPayment, setOpenPayment] = useState(false);
   const [selectedBooking, setSelectedBooking] = useState<string | null>(null);
   const [openRefund, setOpenRefund] = useState(false);
-const [refundBooking, setRefundBooking] = useState<any>(null);
+  const [refundBooking, setRefundBooking] = useState<any>(null);
 
+  const load = useCallback(
+    async (page: number = 1, isInfinite: boolean = false) => {
+      try {
+        if (isInfinite) {
+          setPaymentIsLoadingMore(true);
+        } else {
+          setLoading(true);
+        }
+        const res = await getBookingPayments({ page, limit: paymentLimit });
+        console.log("Payments API Response:", res.data);
 
-  const load = async () => {
-    try {
-      setLoading(true);
-      const res = await getBookingPayments();
-      setBookings(res.data);
-    } catch (e: any) {
-      toast.error(e.response?.data?.message || "Failed to load payments");
-    } finally {
-      setLoading(false);
-    }
-  };
+        let newBookings: any[] = [];
+        if (Array.isArray(res.data)) {
+          newBookings = res.data;
+        } else if (res.data?.data && Array.isArray(res.data.data)) {
+          newBookings = res.data.data;
+        }
+
+        console.log(`Page ${page}: Got ${newBookings.length} bookings`);
+        const shouldHaveMore = newBookings.length === paymentLimit;
+
+        if (isInfinite) {
+          setBookings((prev) => [...prev, ...newBookings]);
+        } else {
+          setBookings(newBookings);
+        }
+
+        setPaymentPage(page);
+        setPaymentHasMore(shouldHaveMore);
+      } catch (e: any) {
+        console.error("Failed to load payments:", e);
+        if (!isInfinite) {
+          toast.error(e.response?.data?.message || "Failed to load payments");
+        }
+      } finally {
+        if (isInfinite) {
+          setPaymentIsLoadingMore(false);
+        } else {
+          setLoading(false);
+        }
+      }
+    },
+    [paymentLimit]
+  );
 
   useEffect(() => {
-    load();
-  }, []);
+    load(1, false);
+  }, [load]);
+
+  // Intersection Observer for payments infinite scroll
+  useEffect(() => {
+    if (!paymentObserverTarget.current || !paymentHasMore) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        const entry = entries[0];
+        if (entry.isIntersecting && paymentHasMore && !paymentIsLoadingMore && !loading) {
+          load(paymentPage + 1, true);
+        }
+      },
+      {
+        threshold: 0.01,
+        rootMargin: "100px",
+      }
+    );
+
+    observer.observe(paymentObserverTarget.current);
+
+    return () => {
+      observer.disconnect();
+    };
+  }, [paymentHasMore, paymentIsLoadingMore, loading, paymentPage, load]);
 
   const getPaymentStatusBadge = (status: string) => {
     const statusMap: Record<string, { bg: string; text: string; icon: string }> = {
       PAID: {
         bg: "bg-green-50 dark:bg-green-900/20",
         text: "text-green-700 dark:text-green-400",
-        icon: "✓"
+        icon: "✓",
       },
       PENDING: {
         bg: "bg-yellow-50 dark:bg-yellow-900/20",
         text: "text-yellow-700 dark:text-yellow-400",
-        icon: "⏱"
+        icon: "⏱",
       },
       PARTIALLY_PAID: {
         bg: "bg-blue-50 dark:bg-blue-900/20",
         text: "text-blue-700 dark:text-blue-400",
-        icon: "⚬"
+        icon: "⚬",
       },
       OVERDUE: {
         bg: "bg-red-50 dark:bg-red-900/20",
         text: "text-red-700 dark:text-red-400",
-        icon: "!"
-      }
+        icon: "!",
+      },
     };
 
     const badgeConfig = statusMap[status] || statusMap.PENDING;
 
     return (
-      <span className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold ${badgeConfig.bg} ${badgeConfig.text}`}>
+      <span
+        className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold ${badgeConfig.bg} ${badgeConfig.text}`}
+      >
         <span>{badgeConfig.icon}</span>
         {status.replace(/_/g, " ")}
       </span>
@@ -71,9 +135,7 @@ const [refundBooking, setRefundBooking] = useState<any>(null);
       <div className="space-y-6">
         {/* Page Header */}
         <div>
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
-            Payments
-          </h1>
+          <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Payments</h1>
           <p className="text-gray-600 dark:text-gray-400 mt-1">
             Manage and view all booking payment records
           </p>
@@ -196,7 +258,9 @@ const [refundBooking, setRefundBooking] = useState<any>(null);
                         </span>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-right">
-                        <span className={`text-sm font-semibold ${b.balance > 0 ? "text-orange-600 dark:text-orange-400" : "text-green-600 dark:text-green-400"}`}>
+                        <span
+                          className={`text-sm font-semibold ${b.balance > 0 ? "text-orange-600 dark:text-orange-400" : "text-green-600 dark:text-green-400"}`}
+                        >
                           ₹{Number(b.balance).toLocaleString("en-IN")}
                         </span>
                       </td>
@@ -214,8 +278,18 @@ const [refundBooking, setRefundBooking] = useState<any>(null);
                               }}
                               className="inline-flex items-center gap-2 px-3 py-2 rounded-lg bg-gradient-to-r from-blue-600 to-blue-700 text-xs font-semibold text-white transition-all hover:shadow-lg hover:from-blue-700 hover:to-blue-800 active:scale-95"
                             >
-                              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                              <svg
+                                className="w-4 h-4"
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
+                              >
+                                <path
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
+                                  strokeWidth={2}
+                                  d="M12 4v16m8-8H4"
+                                />
                               </svg>
                               Pay
                             </button>
@@ -230,8 +304,18 @@ const [refundBooking, setRefundBooking] = useState<any>(null);
                               }}
                               className="inline-flex items-center gap-2 px-3 py-2 rounded-lg bg-gradient-to-r from-red-600 to-red-700 text-xs font-semibold text-white transition-all hover:shadow-lg hover:from-red-700 hover:to-red-800 active:scale-95"
                             >
-                              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 15V9m6 0v6m2 5H7a2 2 0 01-2-2V7a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                              <svg
+                                className="w-4 h-4"
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
+                              >
+                                <path
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
+                                  strokeWidth={2}
+                                  d="M9 15V9m6 0v6m2 5H7a2 2 0 01-2-2V7a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                                />
                               </svg>
                               Refund
                             </button>
@@ -250,10 +334,31 @@ const [refundBooking, setRefundBooking] = useState<any>(null);
               </table>
             </div>
 
+            {/* Infinite Scroll Loading Indicator */}
+            {paymentIsLoadingMore && (
+              <div className="flex items-center justify-center py-6 border-t border-gray-200 dark:border-gray-700">
+                <div className="w-5 h-5 border-3 border-blue-200 border-t-blue-600 rounded-full animate-spin dark:border-gray-700 dark:border-t-blue-400"></div>
+                <span className="ml-3 text-sm text-gray-600 dark:text-gray-400">
+                  Loading more payments...
+                </span>
+              </div>
+            )}
+
+            {/* Observer target for infinite scroll */}
+            <div ref={paymentObserverTarget} className="h-2" />
+
+            {/* End of list message */}
+            {!paymentHasMore && bookings.length > 0 && (
+              <div className="flex items-center justify-center py-6 border-t border-gray-200 dark:border-gray-700">
+                <p className="text-sm text-gray-500 dark:text-gray-400">No more payments to load</p>
+              </div>
+            )}
+
             {/* Table Footer */}
             <div className="px-6 py-4 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900/20">
               <p className="text-sm text-gray-600 dark:text-gray-400">
-                Showing <span className="font-semibold">{bookings.length}</span> booking{bookings.length !== 1 ? "s" : ""}
+                Showing <span className="font-semibold">{bookings.length}</span> booking
+                {bookings.length !== 1 ? "s" : ""}
               </p>
             </div>
           </div>
@@ -273,19 +378,16 @@ const [refundBooking, setRefundBooking] = useState<any>(null);
       )}
 
       {openRefund && refundBooking && (
-  <RefundModal
-    bookingNumber={refundBooking.booking_number}
-    refundableAmount={
-      refundBooking.total_paid - refundBooking.total_refunded
-    }
-    onClose={() => {
-      setOpenRefund(false);
-      setRefundBooking(null);
-    }}
-    onSuccess={load}
-  />
-)}
-
+        <RefundModal
+          bookingNumber={refundBooking.booking_number}
+          refundableAmount={refundBooking.total_paid - refundBooking.total_refunded}
+          onClose={() => {
+            setOpenRefund(false);
+            setRefundBooking(null);
+          }}
+          onSuccess={load}
+        />
+      )}
     </>
   );
 };

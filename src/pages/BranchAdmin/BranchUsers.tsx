@@ -1,8 +1,5 @@
 import { useEffect, useState } from "react";
-import {
-  getBranchUsers,
-  toggleUserStatus
-} from "../../api/branchAdmin.api";
+import { getBranchUsers, toggleUserStatus } from "../../api/branchAdmin.api";
 import UserFormModal from "./UserFormModal";
 import Button from "../../components/ui/button/Button";
 import toast from "react-hot-toast";
@@ -13,7 +10,7 @@ const BranchUsers = () => {
 
   const loadUsers = async () => {
     const res = await getBranchUsers();
-    setUsers(res.data);
+    setUsers(res.data.data);
   };
 
   useEffect(() => {
@@ -30,9 +27,7 @@ const BranchUsers = () => {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-semibold text-gray-900 dark:text-white">
-            Branch Users
-          </h1>
+          <h1 className="text-2xl font-semibold text-gray-900 dark:text-white">Branch Users</h1>
           <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">
             Manage your branch staff members
           </p>
@@ -67,7 +62,10 @@ const BranchUsers = () => {
             <tbody className="divide-y divide-gray-200 dark:divide-gray-800">
               {users.length > 0 ? (
                 users.map((u) => (
-                  <tr key={u.id} className="hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors">
+                  <tr
+                    key={u.id}
+                    className="hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors"
+                  >
                     <td className="px-6 py-4 text-sm font-medium text-gray-900 dark:text-white">
                       {u.name}
                     </td>
@@ -87,7 +85,7 @@ const BranchUsers = () => {
                             : "bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400"
                         }`}
                       >
-                        {u.is_active == true ? 'Active': 'Inactive'}
+                        {u.is_active == true ? "Active" : "Inactive"}
                       </span>
                     </td>
                     <td className="px-6 py-4 text-sm">
@@ -95,7 +93,7 @@ const BranchUsers = () => {
                         onClick={() => toggleStatus(u)}
                         className="inline-flex items-center justify-center gap-2 rounded-lg border border-gray-300 bg-white px-3 py-2 text-xs font-medium text-gray-700 shadow-theme-xs hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:hover:bg-white/[0.03] transition-colors"
                       >
-                        {u.is_active == false ? "Activate":"Deactivate" }
+                        {u.is_active == false ? "Activate" : "Deactivate"}
                       </button>
                     </td>
                   </tr>
@@ -114,12 +112,7 @@ const BranchUsers = () => {
         </div>
       </div>
 
-      {open && (
-        <UserFormModal
-          onClose={() => setOpen(false)}
-          onSuccess={loadUsers}
-        />
-      )}
+      {open && <UserFormModal onClose={() => setOpen(false)} onSuccess={loadUsers} />}
     </div>
   );
 };
