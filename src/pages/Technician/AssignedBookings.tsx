@@ -3,13 +3,19 @@ import api from "../../api/axios";
 import toast from "react-hot-toast";
 import PageMeta from "../../components/common/PageMeta";
 import { collectSample } from "../../api/technician.api";
-import { markBookingCompleted } from "../../api/technician.api";
-
-
+import CompleteBookingPopup from "../../components/CompleteBookingPopup";
 
 const AssignedBookings = () => {
   const [bookings, setBookings] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [popupState, setPopupState] = useState({
+    isOpen: false,
+    bookingId: 0,
+    booking: null as any,
+    bookingNumber: "",
+    customerName: "",
+    pendingAmount: 0,
+  });
 
   const loadBookings = async () => {
     try {
@@ -27,15 +33,14 @@ const AssignedBookings = () => {
   }, []);
 
   const handleCollectSample = async (bookingId: number) => {
-  try {
-    await collectSample(bookingId);
-    toast.success("Sample collected");
-    loadBookings();
-  } catch (err: any) {
-    toast.error(err.response?.data?.message || "Action failed");
-  }
-};
-
+    try {
+      await collectSample(bookingId);
+      toast.success("Sample collected");
+      loadBookings();
+    } catch (err: any) {
+      toast.error(err.response?.data?.message || "Action failed");
+    }
+  };
 
   const getStatusBadgeClasses = (status: string) => {
     const statusLower = status?.toLowerCase() || "";
@@ -53,16 +58,32 @@ const AssignedBookings = () => {
     return `${baseClasses} bg-gray-100 text-gray-700 dark:bg-gray-900/30 dark:text-gray-400`;
   };
 
+  const handleComplete = async (bookingId: number, booking: any) => {
+    // Open popup instead of directly calling API
+    setPopupState({
+      isOpen: true,
+      bookingId,
+      booking,
+      bookingNumber: booking.booking_number || "",
+      customerName: booking.Customer?.name || "",
+      pendingAmount: booking.pending_amount || 0,
+    });
+  };
 
-  const handleComplete = async (bookingId: number) => {
-  try {
-    await markBookingCompleted(bookingId);
-    toast.success("Booking completed");
+  const handleClosePopup = () => {
+    setPopupState({
+      isOpen: false,
+      bookingId: 0,
+      booking: null,
+      bookingNumber: "",
+      customerName: "",
+      pendingAmount: 0,
+    });
+  };
+
+  const handlePopupSuccess = () => {
     loadBookings();
-  } catch (err: any) {
-    toast.error(err.response?.data?.message || "Action failed");
-  }
-};
+  };
 
   const formatDate = (date: string) => {
     try {
@@ -233,29 +254,28 @@ const AssignedBookings = () => {
                         </span>
                       </td>
                       <td className="px-6 py-4">
-  {booking.status === "TECH_ASSIGNED" && (
-    <button
-      onClick={() => handleCollectSample(booking.id)}
-      className="px-3 py-1 bg-green-600 text-white rounded"
-    >
-      Collect Sample
-    </button>
-  )}
+                        {booking.status === "TECH_ASSIGNED" && (
+                          <button
+                            onClick={() => handleCollectSample(booking.id)}
+                            className="px-3 py-1 bg-green-600 text-white rounded"
+                          >
+                            Collect Sample
+                          </button>
+                        )}
 
-  {booking.status === "SAMPLE_COLLECTED" && (
-    <button
-      onClick={() => handleComplete(booking.id)}
-      className="px-3 py-1 bg-blue-600 text-white rounded"
-    >
-      Mark Completed
-    </button>
-  )}
+                        {booking.status === "SAMPLE_COLLECTED" && (
+                          <button
+                            onClick={() => handleComplete(booking.id, booking)}
+                            className="px-3 py-1 bg-blue-600 text-white rounded"
+                          >
+                            Mark Completed
+                          </button>
+                        )}
 
-  {booking.status === "COMPLETED" && (
-    <span className="text-gray-500">Completed</span>
-  )}
-</td>
-
+                        {booking.status === "COMPLETED" && (
+                          <span className="text-gray-500">Completed</span>
+                        )}
+                      </td>
                     </tr>
                   ))}
                 </tbody>
@@ -264,12 +284,24 @@ const AssignedBookings = () => {
             {/* Table Footer */}
             <div className="border-t border-gray-200 dark:border-gray-800 bg-gray-50/50 dark:bg-white/[0.03] px-6 py-4">
               <p className="text-sm text-gray-600 dark:text-gray-400">
-                Showing <span className="font-semibold">{bookings.length}</span> booking{bookings.length !== 1 ? "s" : ""}
+                Showing <span className="font-semibold">{bookings.length}</span> booking
+                {bookings.length !== 1 ? "s" : ""}
               </p>
             </div>
           </div>
         )}
       </div>
+
+      <CompleteBookingPopup
+        isOpen={popupState.isOpen}
+        onClose={handleClosePopup}
+        bookingId={popupState.bookingId}
+        booking={popupState.booking}
+        bookingNumber={popupState.bookingNumber}
+        customerName={popupState.customerName}
+        pendingAmount={popupState.pendingAmount}
+        onSuccess={handlePopupSuccess}
+      />
     </>
   );
 };

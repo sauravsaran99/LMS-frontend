@@ -4,10 +4,15 @@ import { Dropdown } from "../ui/dropdown/Dropdown";
 import { DropdownItem } from "../ui/dropdown/DropdownItem";
 import { MoreDotIcon } from "../../icons";
 import { useState } from "react";
+import { ChartData } from "../../types/dashboard";
 
-export default function MonthlySalesChart() {
+interface MonthlySalesChartProps {
+  chartData: ChartData;
+}
+
+export default function MonthlySalesChart({ chartData }: MonthlySalesChartProps) {
   const options: ApexOptions = {
-    colors: ["#465fff"],
+    colors: ["#465fff", "#9CB9FF"],
     chart: {
       fontFamily: "Outfit, sans-serif",
       type: "bar",
@@ -33,20 +38,10 @@ export default function MonthlySalesChart() {
       colors: ["transparent"],
     },
     xaxis: {
-      categories: [
-        "Jan",
-        "Feb",
-        "Mar",
-        "Apr",
-        "May",
-        "Jun",
-        "Jul",
-        "Aug",
-        "Sep",
-        "Oct",
-        "Nov",
-        "Dec",
-      ],
+      categories: chartData.dates.map((date) => {
+        const d = new Date(date);
+        return d.toLocaleDateString("en-US", { month: "short", day: "numeric" });
+      }),
       axisBorder: {
         show: false,
       },
@@ -85,12 +80,18 @@ export default function MonthlySalesChart() {
       },
     },
   };
+
   const series = [
     {
-      name: "Sales",
-      data: [168, 385, 201, 298, 187, 195, 291, 110, 215, 390, 280, 112],
+      name: "Bookings",
+      data: chartData.bookings,
+    },
+    {
+      name: "Revenue",
+      data: chartData.revenue,
     },
   ];
+
   const [isOpen, setIsOpen] = useState(false);
 
   function toggleDropdown() {
@@ -104,17 +105,13 @@ export default function MonthlySalesChart() {
     <div className="overflow-hidden rounded-2xl border border-gray-200 bg-white px-5 pt-5 dark:border-gray-800 dark:bg-white/[0.03] sm:px-6 sm:pt-6">
       <div className="flex items-center justify-between">
         <h3 className="text-lg font-semibold text-gray-800 dark:text-white/90">
-          Monthly Sales
+          Bookings & Revenue
         </h3>
         <div className="relative inline-block">
           <button className="dropdown-toggle" onClick={toggleDropdown}>
             <MoreDotIcon className="text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 size-6" />
           </button>
-          <Dropdown
-            isOpen={isOpen}
-            onClose={closeDropdown}
-            className="w-40 p-2"
-          >
+          <Dropdown isOpen={isOpen} onClose={closeDropdown} className="w-40 p-2">
             <DropdownItem
               onItemClick={closeDropdown}
               className="flex w-full font-normal text-left text-gray-500 rounded-lg hover:bg-gray-100 hover:text-gray-700 dark:text-gray-400 dark:hover:bg-white/5 dark:hover:text-gray-300"

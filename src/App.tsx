@@ -24,6 +24,10 @@ import AuditLogs from "./pages/Admin/AuditLogs/AuditLogs";
 import Doctors from "./pages/Admin/Doctors/Doctors";
 import Tests from "./pages/Admin/Test/Tests";
 import BranchUsers from "./pages/BranchAdmin/BranchUsers";
+import MyBookings from "./pages/customer/MyBookings";
+import CustomerPayments from "./pages/customer/Payments";
+import CustomerReports from "./pages/customer/Reports";
+import BookingDetails from "./pages/customer/BookingDetails";
 
 export default function App() {
   return (
@@ -33,7 +37,15 @@ export default function App() {
         <Routes>
           {/* Dashboard Layout */}
           <Route element={<AppLayout />}>
-            <Route index path="/" element={<ProtectedRoute><Home /></ProtectedRoute>} />
+            <Route
+              index
+              path="/"
+              element={
+                <ProtectedRoute>
+                  <Home />
+                </ProtectedRoute>
+              }
+            />
 
             {/* Others Page */}
             <Route path="/profile" element={<UserProfiles />} />
@@ -56,8 +68,6 @@ export default function App() {
                 </ProtectedRoute>
               }
             />
-
-
 
             <Route
               path="/admin/tests"
@@ -87,109 +97,149 @@ export default function App() {
             />
 
             <Route
-  path="/technician/bookings"
-  element={
-    <ProtectedRoute roles={["TECHNICIAN"]}>
-      <AssignedBookings />
-    </ProtectedRoute>
-  }
-/>
+              path="/technician/bookings"
+              element={
+                <ProtectedRoute roles={["TECHNICIAN"]}>
+                  <AssignedBookings />
+                </ProtectedRoute>
+              }
+            />
 
-<Route
-  path="/technician/bookings/completed"
-  element={
-    <ProtectedRoute roles={["TECHNICIAN"]}>
-      <CompletedBookings />
-    </ProtectedRoute>
-  }
-/>
+            <Route
+              path="/technician/bookings/completed"
+              element={
+                <ProtectedRoute roles={["TECHNICIAN"]}>
+                  <CompletedBookings />
+                </ProtectedRoute>
+              }
+            />
 
-<Route
-  path="/payments"
-  element={
-    <ProtectedRoute roles={["SUPER_ADMIN", "ADMIN", "RECEPTIONIST", "TECHNICIAN"]}>
-      <Payments />
-    </ProtectedRoute>
-  }
-/>
+            <Route
+              path="/payments"
+              element={
+                <ProtectedRoute roles={["SUPER_ADMIN", "ADMIN", "RECEPTIONIST", "TECHNICIAN"]}>
+                  <Payments />
+                </ProtectedRoute>
+              }
+            />
 
-<Route
-  path="/reports/summary"
-  element={
-    <ProtectedRoute roles={["SUPER_ADMIN","BRANCH_ADMIN",  "RECEPTIONIST"]}>
-      <ReportSummary />
-    </ProtectedRoute>
-  }
-/>
+            <Route
+              path="/reports/summary"
+              element={
+                <ProtectedRoute roles={["SUPER_ADMIN", "BRANCH_ADMIN", "RECEPTIONIST"]}>
+                  <ReportSummary />
+                </ProtectedRoute>
+              }
+            />
 
-<Route
-  path="/reports/monthly-breakdown"
-  element={
-    <ProtectedRoute roles={["SUPER_ADMIN","BRANCH_ADMIN", "RECEPTIONIST"]}>
-      <MonthlyBreakdown />
-    </ProtectedRoute>
-  }
-/>
+            <Route
+              path="/reports/monthly-breakdown"
+              element={
+                <ProtectedRoute roles={["SUPER_ADMIN", "BRANCH_ADMIN", "RECEPTIONIST"]}>
+                  <MonthlyBreakdown />
+                </ProtectedRoute>
+              }
+            />
 
-<Route
-  path="/reports/technician-monthly-breakdown"
-  element={
-    <ProtectedRoute roles={["SUPER_ADMIN","BRANCH_ADMIN", "RECEPTIONIST"]}>
-      <TechnicianMonthlyReport />
-    </ProtectedRoute>
-  }
-/>
+            <Route
+              path="/reports/technician-monthly-breakdown"
+              element={
+                <ProtectedRoute roles={["SUPER_ADMIN", "BRANCH_ADMIN", "RECEPTIONIST"]}>
+                  <TechnicianMonthlyReport />
+                </ProtectedRoute>
+              }
+            />
 
-<Route
-  path="/reports/test-monthly-breakdown"
-  element={
-    <ProtectedRoute roles={["SUPER_ADMIN","BRANCH_ADMIN", "RECEPTIONIST"]}>
-      <TestMonthlyReport />
-    </ProtectedRoute>
-  }
-/>
+            <Route
+              path="/reports/test-monthly-breakdown"
+              element={
+                <ProtectedRoute roles={["SUPER_ADMIN", "BRANCH_ADMIN", "RECEPTIONIST"]}>
+                  <TestMonthlyReport />
+                </ProtectedRoute>
+              }
+            />
 
-<Route
-  path="/admin/branches"
-  element={
-    <ProtectedRoute roles={["SUPER_ADMIN"]}>
-      <BranchList />
-    </ProtectedRoute>
-  }
-/>
+            <Route
+              path="/admin/branches"
+              element={
+                <ProtectedRoute roles={["SUPER_ADMIN"]}>
+                  <BranchList />
+                </ProtectedRoute>
+              }
+            />
 
-<Route
-  path="/admin/audit-logs"
-  element={
-    <ProtectedRoute roles={["SUPER_ADMIN"]}>
-      <AuditLogs />
-    </ProtectedRoute>
-  }
-/>
+            <Route
+              path="/admin/audit-logs"
+              element={
+                <ProtectedRoute roles={["SUPER_ADMIN"]}>
+                  <AuditLogs />
+                </ProtectedRoute>
+              }
+            />
 
-<Route
-  path="/branch-admin/users"
-  element={
-    <ProtectedRoute roles={["BRANCH_ADMIN"]}>
-      <BranchUsers />
-    </ProtectedRoute>
-  }
-/>
+            <Route
+              path="/branch-admin/users"
+              element={
+                <ProtectedRoute roles={["BRANCH_ADMIN"]}>
+                  <BranchUsers />
+                </ProtectedRoute>
+              }
+            />
 
+            <Route
+              path="/customer/bookings"
+              element={
+                <ProtectedRoute>
+                  <MyBookings />
+                </ProtectedRoute>
+              }
+            />
 
+            <Route
+              path="/customer/bookings/:id"
+              element={
+                <ProtectedRoute>
+                  <BookingDetails />
+                </ProtectedRoute>
+              }
+            />
 
+            <Route
+              path="/customer/payments"
+              element={
+                <ProtectedRoute>
+                  <CustomerPayments />
+                </ProtectedRoute>
+              }
+            />
 
-
-
-
-
-
+            <Route
+              path="/customer/reports"
+              element={
+                <ProtectedRoute>
+                  <CustomerReports />
+                </ProtectedRoute>
+              }
+            />
           </Route>
 
           {/* Auth Layout */}
-          <Route path="/signin" element={
-            <PublicRoute><SignIn /></PublicRoute>} />
-          <Route path="/signup" element={<PublicRoute><SignUp /></PublicRoute>} />
+          <Route
+            path="/signin"
+            element={
+              <PublicRoute>
+                <SignIn />
+              </PublicRoute>
+            }
+          />
+          <Route
+            path="/signup"
+            element={
+              <PublicRoute>
+                <SignUp />
+              </PublicRoute>
+            }
+          />
 
           {/* Fallback Route */}
           <Route path="*" element={<NotFound />} />

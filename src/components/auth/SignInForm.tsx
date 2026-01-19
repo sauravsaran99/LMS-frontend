@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router";
+import toast from "react-hot-toast";
 import { ChevronLeftIcon, EyeCloseIcon, EyeIcon } from "../../icons";
 import Label from "../form/Label";
 import Input from "../form/input/InputField";
@@ -20,18 +21,32 @@ export default function SignInForm() {
 
   const handleSubmit = async (e: any) => {
     e.preventDefault(); // 🔥 STOP page reload
-    console.log('calling api')
-    await api.post("/auth/login", {
-      email,
-      password,
-    });
 
+    try {
+      // Validate inputs
+      if (!email || !password) {
+        toast.error("Please fill in all fields");
+        return;
+      }
 
-    await login();
-    navigate("/");
+      console.log("calling api");
+      const response = await api.post("/auth/login", {
+        email,
+        password,
+      });
+
+      await login();
+      toast.success("Login successful!");
+      navigate("/");
+    } catch (error: any) {
+      const errorMessage =
+        error?.response?.data?.message || error?.message || "Login failed. Please try again.";
+      toast.error(errorMessage);
+      console.error("Login error:", error);
+    }
   };
 
-  console.log('correct')
+  console.log("correct");
   return (
     <div className="flex flex-col flex-1">
       <div className="w-full max-w-md pt-10 mx-auto">
@@ -54,7 +69,7 @@ export default function SignInForm() {
             </p>
           </div>
           <div>
-            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-5">
+            {/* <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-5">
               <button className="inline-flex items-center justify-center gap-3 py-3 text-sm font-normal text-gray-700 transition-colors bg-gray-100 rounded-lg px-7 hover:bg-gray-200 hover:text-gray-800 dark:bg-white/5 dark:text-white/90 dark:hover:bg-white/10">
                 <svg
                   width="20"
@@ -95,8 +110,8 @@ export default function SignInForm() {
                 </svg>
                 Sign in with X
               </button>
-            </div>
-            <div className="relative py-3 sm:py-5">
+            </div> */}
+            {/* <div className="relative py-3 sm:py-5">
               <div className="absolute inset-0 flex items-center">
                 <div className="w-full border-t border-gray-200 dark:border-gray-800"></div>
               </div>
@@ -105,7 +120,7 @@ export default function SignInForm() {
                   Or
                 </span>
               </div>
-            </div>
+            </div> */}
             <form onSubmit={handleSubmit}>
               <div className="space-y-6">
                 <div>
@@ -141,7 +156,7 @@ export default function SignInForm() {
                     </span>
                   </div>
                 </div>
-                <div className="flex items-center justify-between">
+                {/* <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
                     <Checkbox checked={isChecked} onChange={setIsChecked} />
                     <span className="block font-normal text-gray-700 text-theme-sm dark:text-gray-400">
@@ -154,17 +169,16 @@ export default function SignInForm() {
                   >
                     Forgot password?
                   </Link>
-                </div>
+                </div> */}
                 <div>
                   <Button className="w-full" size="sm" type="submit">
                     Sign in
                   </Button>
-
                 </div>
               </div>
             </form>
 
-            <div className="mt-5">
+            {/* <div className="mt-5">
               <p className="text-sm font-normal text-center text-gray-700 dark:text-gray-400 sm:text-start">
                 Don&apos;t have an account? {""}
                 <Link
@@ -174,7 +188,7 @@ export default function SignInForm() {
                   Sign Up
                 </Link>
               </p>
-            </div>
+            </div> */}
           </div>
         </div>
       </div>

@@ -1,22 +1,9 @@
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHeader,
-  TableRow,
-} from "../ui/table";
+import { Table, TableBody, TableCell, TableHeader, TableRow } from "../ui/table";
 import Badge from "../ui/badge/Badge";
+import { RecentBooking } from "../../types/dashboard";
 
-// Define the TypeScript interface for the table rows
-interface Product {
-  id: number; // Unique identifier for each product
-  name: string; // Product name
-  variants: string; // Number of variants (e.g., "1 Variant", "2 Variants")
-  category: string; // Category of the product
-  price: string; // Price of the product (as a string with currency symbol)
-  // status: string; // Status of the product
-  image: string; // URL or path to the product image
-  status: "Delivered" | "Pending" | "Canceled"; // Status of the product
+interface RecentOrdersProps {
+  bookings: RecentBooking[];
 }
 
 // Define the table data using the interface
@@ -68,13 +55,35 @@ const tableData: Product[] = [
   },
 ];
 
-export default function RecentOrders() {
+export default function RecentOrders({ bookings }: RecentOrdersProps) {
+  const formatCurrency = (value: string): string => {
+    const numValue = parseFloat(value);
+    return new Intl.NumberFormat("en-IN", {
+      style: "currency",
+      currency: "INR",
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    }).format(numValue);
+  };
+
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case "COMPLETED":
+        return "success";
+      case "PENDING":
+        return "warning";
+      case "CANCELLED":
+        return "error";
+      default:
+        return "secondary";
+    }
+  };
   return (
     <div className="overflow-hidden rounded-2xl border border-gray-200 bg-white px-4 pb-3 pt-4 dark:border-gray-800 dark:bg-white/[0.03] sm:px-6">
       <div className="flex flex-col gap-2 mb-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h3 className="text-lg font-semibold text-gray-800 dark:text-white/90">
-            Recent Orders
+            Recent Bookings
           </h3>
         </div>
 
@@ -131,19 +140,25 @@ export default function RecentOrders() {
                 isHeader
                 className="py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400"
               >
-                Products
+                Booking Number
               </TableCell>
               <TableCell
                 isHeader
                 className="py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400"
               >
-                Category
+                Customer
               </TableCell>
               <TableCell
                 isHeader
                 className="py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400"
               >
-                Price
+                Tests
+              </TableCell>
+              <TableCell
+                isHeader
+                className="py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400"
+              >
+                Amount
               </TableCell>
               <TableCell
                 isHeader
@@ -155,47 +170,26 @@ export default function RecentOrders() {
           </TableHeader>
 
           {/* Table Body */}
-
           <TableBody className="divide-y divide-gray-100 dark:divide-gray-800">
-            {tableData.map((product) => (
-              <TableRow key={product.id} className="">
+            {bookings.map((booking, index) => (
+              <TableRow key={index} className="">
                 <TableCell className="py-3">
-                  <div className="flex items-center gap-3">
-                    <div className="h-[50px] w-[50px] overflow-hidden rounded-md">
-                      <img
-                        src={product.image}
-                        className="h-[50px] w-[50px]"
-                        alt={product.name}
-                      />
-                    </div>
-                    <div>
-                      <p className="font-medium text-gray-800 text-theme-sm dark:text-white/90">
-                        {product.name}
-                      </p>
-                      <span className="text-gray-500 text-theme-xs dark:text-gray-400">
-                        {product.variants}
-                      </span>
-                    </div>
-                  </div>
+                  <p className="font-medium text-gray-800 text-theme-sm dark:text-white/90">
+                    {booking.booking_number}
+                  </p>
                 </TableCell>
                 <TableCell className="py-3 text-gray-500 text-theme-sm dark:text-gray-400">
-                  {product.price}
+                  {booking.customer_name}
                 </TableCell>
                 <TableCell className="py-3 text-gray-500 text-theme-sm dark:text-gray-400">
-                  {product.category}
+                  <span className="line-clamp-2">{booking.tests}</span>
+                </TableCell>
+                <TableCell className="py-3 text-gray-500 text-theme-sm dark:text-gray-400 font-medium">
+                  {formatCurrency(booking.final_amount)}
                 </TableCell>
                 <TableCell className="py-3 text-gray-500 text-theme-sm dark:text-gray-400">
-                  <Badge
-                    size="sm"
-                    color={
-                      product.status === "Delivered"
-                        ? "success"
-                        : product.status === "Pending"
-                        ? "warning"
-                        : "error"
-                    }
-                  >
-                    {product.status}
+                  <Badge size="sm" color={getStatusColor(booking.status)}>
+                    {booking.status}
                   </Badge>
                 </TableCell>
               </TableRow>

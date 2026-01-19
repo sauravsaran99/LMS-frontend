@@ -30,7 +30,7 @@ export default function SignUpForm() {
             </p>
           </div>
           <div>
-            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-5">
+            {/* <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-5">
               <button className="inline-flex items-center justify-center gap-3 py-3 text-sm font-normal text-gray-700 transition-colors bg-gray-100 rounded-lg px-7 hover:bg-gray-200 hover:text-gray-800 dark:bg-white/5 dark:text-white/90 dark:hover:bg-white/10">
                 <svg
                   width="20"
@@ -71,8 +71,8 @@ export default function SignUpForm() {
                 </svg>
                 Sign up with X
               </button>
-            </div>
-            <div className="relative py-3 sm:py-5">
+            </div> */}
+            {/* <div className="relative py-3 sm:py-5">
               <div className="absolute inset-0 flex items-center">
                 <div className="w-full border-t border-gray-200 dark:border-gray-800"></div>
               </div>
@@ -81,7 +81,7 @@ export default function SignUpForm() {
                   Or
                 </span>
               </div>
-            </div>
+            </div> */}
             <form>
               <div className="space-y-5">
                 <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
@@ -102,12 +102,7 @@ export default function SignUpForm() {
                     <Label>
                       Last Name<span className="text-error-500">*</span>
                     </Label>
-                    <Input
-                      type="text"
-                      id="lname"
-                      name="lname"
-                      placeholder="Enter your last name"
-                    />
+                    <Input type="text" id="lname" name="lname" placeholder="Enter your last name" />
                   </div>
                 </div>
                 {/* <!-- Email --> */}
@@ -115,12 +110,7 @@ export default function SignUpForm() {
                   <Label>
                     Email<span className="text-error-500">*</span>
                   </Label>
-                  <Input
-                    type="email"
-                    id="email"
-                    name="email"
-                    placeholder="Enter your email"
-                  />
+                  <Input type="email" id="email" name="email" placeholder="Enter your email" />
                 </div>
                 {/* <!-- Password --> */}
                 <div>
@@ -146,20 +136,11 @@ export default function SignUpForm() {
                 </div>
                 {/* <!-- Checkbox --> */}
                 <div className="flex items-center gap-3">
-                  <Checkbox
-                    className="w-5 h-5"
-                    checked={isChecked}
-                    onChange={setIsChecked}
-                  />
+                  <Checkbox className="w-5 h-5" checked={isChecked} onChange={setIsChecked} />
                   <p className="inline-block font-normal text-gray-500 dark:text-gray-400">
                     By creating an account means you agree to the{" "}
-                    <span className="text-gray-800 dark:text-white/90">
-                      Terms and Conditions,
-                    </span>{" "}
-                    and our{" "}
-                    <span className="text-gray-800 dark:text-white">
-                      Privacy Policy
-                    </span>
+                    <span className="text-gray-800 dark:text-white/90">Terms and Conditions,</span>{" "}
+                    and our <span className="text-gray-800 dark:text-white">Privacy Policy</span>
                   </p>
                 </div>
                 {/* <!-- Button --> */}
