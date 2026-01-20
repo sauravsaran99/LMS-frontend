@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef, useCallback } from "react";
 import { getBranches, updateBranchStatus } from "../../../api/branch.api";
 import BranchFormModal from "./BranchFormModal";
 import Button from "../../../components/ui/button/Button";
@@ -10,32 +10,110 @@ const BranchList = () => {
   const [open, setOpen] = useState(false);
   const [editing, setEditing] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [hasMore, setHasMore] = useState(true);
+  const observerTarget = useRef<HTMLDivElement>(null);
+  const ITEMS_PER_PAGE = 10;
 
-  const fetchBranches = async () => {
-    try {
-      setLoading(true);
-      const res = await getBranches();
-      setBranches(res.data);
-    } catch (error) {
-      toast.error("Failed to load branches");
-    } finally {
-      setLoading(false);
-    }
-  };
+  const fetchBranches = useCallback(
+    async (page: number = 1, isInfinite: boolean = false) => {
+      try {
+        if (isInfinite) {
+          setIsLoadingMore(true);
+        } else {
+          setLoading(true);
+        }
 
+        // Fetch with pagination parameters
+        const res = await getBranches({ page, limit: ITEMS_PER_PAGE });
+        console.log("API Response:", res.data);
+
+        // Handle different API response formats
+        let newBranches: any[] = [];
+        let shouldHaveMore = false;
+
+        if (Array.isArray(res.data)) {
+          // If direct array
+          newBranches = res.data;
+          shouldHaveMore = false;
+        } else if (res.data?.data && Array.isArray(res.data.data)) {
+          // If nested in data property
+          newBranches = res.data.data;
+          shouldHaveMore =
+            res.data.hasMore !== undefined
+              ? res.data.hasMore
+              : newBranches.length === ITEMS_PER_PAGE;
+        }
+
+        console.log(`Page ${page}: Got ${newBranches.length} branches`);
+
+        if (isInfinite) {
+          setBranches((prev) => [...prev, ...newBranches]);
+        } else {
+          setBranches(newBranches);
+        }
+
+        setCurrentPage(page);
+        setHasMore(shouldHaveMore);
+
+        console.log(`shouldHaveMore: ${shouldHaveMore}`);
+      } catch (error) {
+        console.error("Failed to load branches:", error);
+        toast.error("Failed to load branches");
+      } finally {
+        if (isInfinite) {
+          setIsLoadingMore(false);
+        } else {
+          setLoading(false);
+        }
+      }
+    },
+    [ITEMS_PER_PAGE]
+  );
+
+  // Initial load
   useEffect(() => {
-    fetchBranches();
-  }, []);
+    fetchBranches(1, false);
+  }, [fetchBranches]);
+
+  // Intersection Observer for infinite scroll
+  useEffect(() => {
+    if (!observerTarget.current || !hasMore) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        const entry = entries[0];
+        console.log("Observer triggered:", {
+          isIntersecting: entry.isIntersecting,
+          hasMore,
+          isLoadingMore,
+          loading,
+        });
+        if (entry.isIntersecting && hasMore && !isLoadingMore && !loading) {
+          console.log("Loading next page:", currentPage + 1);
+          fetchBranches(currentPage + 1, true);
+        }
+      },
+      {
+        threshold: 0.01,
+        rootMargin: "100px",
+      }
+    );
+
+    observer.observe(observerTarget.current);
+
+    return () => {
+      observer.disconnect();
+    };
+  }, [hasMore, isLoadingMore, loading, currentPage, fetchBranches]);
 
   const toggleStatus = async (branch: any) => {
-    console.log('branch', branch)
+    console.log("branch", branch);
     try {
-      await updateBranchStatus(
-        branch.id,
-        branch.is_active === true ? "INACTIVE" : "ACTIVE"
-      );
+      await updateBranchStatus(branch.id, branch.is_active === true ? "INACTIVE" : "ACTIVE");
       toast.success("Branch status updated");
-      await fetchBranches();
+      await fetchBranches(1, false);
     } catch (error) {
       toast.error("Failed to update branch status");
     }
@@ -61,9 +139,7 @@ const BranchList = () => {
       {/* Page Header */}
       <div className="mb-6 flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
-            Branches
-          </h1>
+          <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Branches</h1>
           <p className="mt-1 text-gray-600 dark:text-gray-400">
             Manage and view all branch information
           </p>
@@ -73,12 +149,7 @@ const BranchList = () => {
           variant="primary"
           size="md"
           startIcon={
-            <svg
-              className="h-5 w-5"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
+            <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path
                 strokeLinecap="round"
                 strokeLinejoin="round"
@@ -100,9 +171,7 @@ const BranchList = () => {
             <div className="flex items-center justify-center py-12">
               <div className="text-center">
                 <div className="inline-block animate-spin rounded-full border-4 border-gray-300 border-t-blue-500 h-8 w-8 mb-3"></div>
-                <p className="text-sm text-gray-600 dark:text-gray-400">
-                  Loading branches...
-                </p>
+                <p className="text-sm text-gray-600 dark:text-gray-400">Loading branches...</p>
               </div>
             </div>
           ) : branches.length === 0 ? (
@@ -165,7 +234,9 @@ const BranchList = () => {
                     <TableRow
                       key={branch.id}
                       className={`border-b border-gray-200 transition-colors hover:bg-gray-50 dark:border-gray-700 dark:hover:bg-gray-800/30 ${
-                        index % 2 === 0 ? "bg-white dark:bg-transparent" : "bg-gray-50/50 dark:bg-white/[0.01]"
+                        index % 2 === 0
+                          ? "bg-white dark:bg-transparent"
+                          : "bg-gray-50/50 dark:bg-white/[0.01]"
                       }`}
                     >
                       <TableCell className="px-6 py-4 text-sm font-medium text-gray-900 dark:text-white">
@@ -175,7 +246,7 @@ const BranchList = () => {
                         {branch.city || "-"}
                       </TableCell>
                       <TableCell className="px-6 py-4 text-sm">
-                        {getStatusBadge(branch.is_active == true ? 'ACTIVE' : 'INACTIVE')}
+                        {getStatusBadge(branch.is_active == true ? "ACTIVE" : "INACTIVE")}
                       </TableCell>
                       <TableCell className="px-6 py-4 text-sm">
                         <div className="flex items-center gap-2">
@@ -217,6 +288,26 @@ const BranchList = () => {
             </div>
           )}
         </div>
+
+        {/* Infinite Scroll Loading Indicator */}
+        {isLoadingMore && (
+          <div className="flex items-center justify-center py-6 bg-white dark:bg-white/[0.03]">
+            <div className="w-6 h-6 border-3 border-gray-200 border-t-blue-600 rounded-full animate-spin dark:border-gray-700 dark:border-t-blue-400"></div>
+            <span className="ml-3 text-sm text-gray-600 dark:text-gray-400">
+              Loading more branches...
+            </span>
+          </div>
+        )}
+
+        {/* Observer target for infinite scroll */}
+        <div ref={observerTarget} className="h-2" />
+
+        {/* End of list message */}
+        {!hasMore && branches.length > 0 && (
+          <div className="flex items-center justify-center py-6 bg-white dark:bg-white/[0.03]">
+            <p className="text-sm text-gray-500 dark:text-gray-400">No more branches to load</p>
+          </div>
+        )}
       </div>
 
       {/* Modal */}
@@ -227,7 +318,11 @@ const BranchList = () => {
             setOpen(false);
             setEditing(null);
           }}
-          onSuccess={fetchBranches}
+          onSuccess={() => {
+            fetchBranches(1, false);
+            setOpen(false);
+            setEditing(null);
+          }}
         />
       )}
     </>

@@ -20,7 +20,7 @@ const AssignedBookings = () => {
   const loadBookings = async () => {
     try {
       const res = await api.get("/technician/bookings");
-      setBookings(res.data);
+      setBookings(res.data.data);
     } catch {
       toast.error("Failed to load assigned bookings");
     } finally {

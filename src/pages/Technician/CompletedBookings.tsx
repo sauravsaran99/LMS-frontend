@@ -10,7 +10,7 @@ const CompletedBookings = () => {
   const loadData = async () => {
     try {
       const res = await getCompletedBookings();
-      setBookings(res.data);
+      setBookings(res.data.data);
     } catch {
       toast.error("Failed to load completed bookings");
     } finally {
@@ -68,9 +68,7 @@ const CompletedBookings = () => {
         {/* Page Header */}
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
-              Completed Bookings
-            </h1>
+            <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Completed Bookings</h1>
             <p className="text-gray-600 dark:text-gray-400 mt-1">
               Review all your completed and finished bookings
             </p>
@@ -206,8 +204,16 @@ const CompletedBookings = () => {
                       </td>
                       <td className="px-6 py-4">
                         <div className="flex items-center gap-2">
-                          <svg className="w-4 h-4 text-success-600 dark:text-success-400" fill="currentColor" viewBox="0 0 20 20">
-                            <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                          <svg
+                            className="w-4 h-4 text-success-600 dark:text-success-400"
+                            fill="currentColor"
+                            viewBox="0 0 20 20"
+                          >
+                            <path
+                              fillRule="evenodd"
+                              d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                              clipRule="evenodd"
+                            />
                           </svg>
                           <span className="text-sm font-medium text-gray-900 dark:text-white">
                             {formatDateTime(booking.updated_at)}
@@ -222,7 +228,8 @@ const CompletedBookings = () => {
             {/* Table Footer */}
             <div className="border-t border-gray-200 dark:border-gray-800 bg-gray-50/50 dark:bg-white/[0.03] px-6 py-4">
               <p className="text-sm text-gray-600 dark:text-gray-400">
-                Showing <span className="font-semibold">{bookings.length}</span> completed booking{bookings.length !== 1 ? "s" : ""}
+                Showing <span className="font-semibold">{bookings.length}</span> completed booking
+                {bookings.length !== 1 ? "s" : ""}
               </p>
             </div>
           </div>
