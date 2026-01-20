@@ -28,6 +28,7 @@ import MyBookings from "./pages/customer/MyBookings";
 import CustomerPayments from "./pages/customer/Payments";
 import CustomerReports from "./pages/customer/Reports";
 import BookingDetails from "./pages/customer/BookingDetails";
+import BranchAdmins from "./pages/Admin/BranchAdmins/BranchAdmins";
 
 export default function App() {
   return (
@@ -173,6 +174,15 @@ export default function App() {
               element={
                 <ProtectedRoute roles={["SUPER_ADMIN"]}>
                   <AuditLogs />
+                </ProtectedRoute>
+              }
+            />
+
+            <Route
+              path="/admin/branch-admins"
+              element={
+                <ProtectedRoute roles={["SUPER_ADMIN"]}>
+                  <BranchAdmins />
                 </ProtectedRoute>
               }
             />

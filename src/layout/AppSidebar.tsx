@@ -68,6 +68,7 @@ const navItems: NavItem[] = [
       },
       { name: "Test Master", path: "/admin/tests", roles: ["SUPER_ADMIN"] },
       { name: "Doctor Master", path: "/admin/doctors", roles: ["SUPER_ADMIN"] },
+      { name: "Branch Admins", path: "/admin/branch-admins", roles: ["SUPER_ADMIN"] },
       { name: "Audit Logs", path: "/admin/audit-logs", roles: ["SUPER_ADMIN"] },
     ],
   },

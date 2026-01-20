@@ -215,7 +215,7 @@ const Customers = () => {
   return (
     <>
       <PageMeta title="Customers" description="Manage and search customers" />
-      <div className="space-y-6">
+      <div className="space-y-6 relative">
         {/* Page Header */}
         <div className="flex items-center justify-between">
           <div>
@@ -436,7 +436,7 @@ const Customers = () => {
 
         {/* Add Customer Form */}
         {showForm && (
-          <div className="rounded-2xl border border-gray-200 bg-white p-6 dark:border-gray-800 dark:bg-white/[0.03] shadow-sm hover:shadow-md transition-shadow">
+          <div className="absolute top-40 left-0 right-0 mx-6 z-50 rounded-2xl border border-gray-200 bg-white p-6 dark:border-gray-800 dark:bg-white/[0.03] shadow-lg hover:shadow-xl transition-shadow">
             <div className="flex items-center gap-3 mb-4">
               <div className="flex items-center justify-center w-10 h-10 rounded-lg bg-green-100 dark:bg-green-900/30">
                 <svg
