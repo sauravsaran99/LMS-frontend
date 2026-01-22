@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Link } from "react-router";
 
 interface FreeTrialModalProps {
   isOpen: boolean;
@@ -193,12 +194,12 @@ const FreeTrialModal: React.FC<FreeTrialModalProps> = ({ isOpen, onClose }) => {
             >
               Close
             </button>
-            <a
-              href="/signin"
+            <Link
+              to="/signin"
               className="flex-1 px-4 py-2.5 rounded-lg bg-gradient-to-r from-brand-500 to-brand-700 dark:from-brand-600 dark:to-brand-800 text-white font-semibold hover:shadow-lg hover:shadow-brand-500/30 transition-all text-center"
             >
               Start Trial
-            </a>
+            </Link>
           </div>
         </div>
       </div>
