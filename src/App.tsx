@@ -11,6 +11,7 @@ import ProtectedRoute from "./auth/ProtectedRoute";
 import Bookings from "./pages/Bookings/Bookings";
 import Customers from "./pages/Customers/Customers";
 import PublicRoute from "./auth/PublicRoute";
+import LandingPage from "./pages/LandingPage";
 import TechnicianAssignment from "./pages/Bookings/TechnicianAssignment";
 import AssignedBookings from "./pages/Technician/AssignedBookings";
 import CompletedBookings from "./pages/Technician/CompletedBookings";
@@ -36,11 +37,22 @@ export default function App() {
       <Router>
         <ScrollToTop />
         <Routes>
+          {/* Landing Page for Public Users */}
+          <Route
+            index
+            path="/"
+            element={
+              <PublicRoute>
+                <LandingPage />
+              </PublicRoute>
+            }
+          />
+
           {/* Dashboard Layout */}
           <Route element={<AppLayout />}>
             <Route
               index
-              path="/"
+              path="/dashboard"
               element={
                 <ProtectedRoute>
                   <Home />

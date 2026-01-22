@@ -3,13 +3,13 @@ import { useAuth } from "../context/AuthContext";
 import { JSX } from "react";
 
 const PublicRoute = ({ children }: { children: JSX.Element }) => {
-    const { user } = useAuth();
+  const { user } = useAuth();
 
-    if (user) {
-        return <Navigate to="/" replace />;
-    }
+  if (user) {
+    return <Navigate to="/dashboard" replace />;
+  }
 
-    return children;
+  return children;
 };
 
 export default PublicRoute;

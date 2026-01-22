@@ -38,7 +38,7 @@ const navItems: NavItem[] = [
   {
     icon: <GridIcon />,
     name: "Dashboard",
-    path: "/",
+    path: "/dashboard",
     roles: ["SUPER_ADMIN", "BRANCH_ADMIN"],
   },
   {
@@ -372,7 +372,7 @@ const AppSidebar: React.FC = () => {
       <div
         className={`py-8 flex ${!isExpanded && !isHovered ? "lg:justify-center" : "justify-start"}`}
       >
-        <Link to="/" className="flex items-center gap-2">
+        <Link to="/dashboard" className="flex items-center gap-2">
           {isExpanded || isHovered || isMobileOpen ? (
             <div className="flex items-center gap-2">
               <div className="flex items-center justify-center w-10 h-10 rounded-lg bg-gradient-to-br from-brand-500 to-brand-600 dark:from-brand-600 dark:to-brand-700">
