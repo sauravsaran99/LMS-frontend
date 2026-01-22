@@ -5,6 +5,8 @@ import { JSX } from "react";
 const PublicRoute = ({ children }: { children: JSX.Element }) => {
   const { user } = useAuth();
 
+  console.log("user_test", user);
+
   if (user) {
     return <Navigate to="/dashboard" replace />;
   }
