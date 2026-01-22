@@ -1,8 +1,12 @@
 import { Link } from "react-router-dom";
+import { useState } from "react";
 import PublicHeader from "../components/public/PublicHeader";
 import PublicFooter from "../components/public/PublicFooter";
+import FreeTrialModal from "../components/public/FreeTrialModal";
 
 const LandingPage: React.FC = () => {
+  const [showFreeTrialModal, setShowFreeTrialModal] = useState(false);
+
   return (
     <div className="min-h-screen flex flex-col bg-white dark:bg-gray-900">
       {/* Header */}
@@ -71,23 +75,12 @@ const LandingPage: React.FC = () => {
 
             {/* Right Visual */}
             <div className="relative hidden lg:block">
-              <div className="relative bg-gradient-to-br from-brand-50 to-blue-light-50 dark:from-gray-800 dark:to-gray-900 rounded-2xl p-8 border border-gray-200 dark:border-gray-800">
-                {/* Placeholder for Hero Image */}
-                <div className="aspect-square bg-gradient-to-br from-brand-200 to-blue-light-200 dark:from-brand-900 dark:to-blue-light-900 rounded-xl flex items-center justify-center">
-                  <svg
-                    className="w-32 h-32 text-brand-400 dark:text-brand-600 opacity-50"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={1.5}
-                      d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"
-                    />
-                  </svg>
-                </div>
+              <div className="relative bg-gradient-to-br from-brand-50 to-blue-light-50 dark:from-gray-800 dark:to-gray-900 rounded-2xl overflow-hidden border border-gray-200 dark:border-gray-800">
+                <img
+                  src="/images/homepage/header_img.png"
+                  alt="Laboratory Management Dashboard"
+                  className="w-full h-full object-cover"
+                />
               </div>
             </div>
           </div>
@@ -397,24 +390,373 @@ const LandingPage: React.FC = () => {
 
             {/* Right Visual */}
             <div className="relative hidden lg:block">
-              <div className="bg-gradient-to-br from-brand-50 to-blue-light-50 dark:from-gray-800 dark:to-gray-900 rounded-2xl p-8 border border-gray-200 dark:border-gray-800">
-                <div className="aspect-square bg-gradient-to-br from-brand-200 to-blue-light-200 dark:from-brand-900 dark:to-blue-light-900 rounded-xl flex items-center justify-center">
-                  <svg
-                    className="w-32 h-32 text-brand-400 dark:text-brand-600 opacity-50"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={1.5}
-                      d="M13 10V3L4 14h7v7l9-11h-7z"
-                    />
-                  </svg>
+              <div className="bg-gradient-to-br from-brand-50 to-blue-light-50 dark:from-gray-800 dark:to-gray-900 rounded-2xl overflow-hidden border border-gray-200 dark:border-gray-800">
+                <img
+                  src="/images/homepage/bottom_img2.png"
+                  alt="Why Choose Our LMS Benefits"
+                  className="w-full h-full object-cover"
+                />
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Pricing Section */}
+      <section id="pricing" className="px-4 py-16 sm:px-6 lg:px-8 bg-gray-50 dark:bg-gray-800">
+        <div className="max-w-7xl mx-auto">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 dark:text-white mb-4">
+              Simple, Transparent Pricing
+            </h2>
+            <p className="text-lg text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
+              Choose the perfect plan for your laboratory. All plans include a 14-day free trial.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto">
+            {/* Basic Plan */}
+            <div className="relative bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 overflow-hidden hover:shadow-lg dark:hover:shadow-lg hover:shadow-gray-300/50 dark:hover:shadow-gray-700/50 transition-all duration-300">
+              <div className="p-8">
+                <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
+                  Starter
+                </h3>
+                <p className="text-sm text-gray-600 dark:text-gray-400 mb-6">
+                  Perfect for small clinics
+                </p>
+
+                <div className="mb-6">
+                  <span className="text-4xl font-bold text-gray-900 dark:text-white">$99</span>
+                  <span className="text-gray-600 dark:text-gray-400">/month</span>
+                </div>
+
+                <button
+                  onClick={() => setShowFreeTrialModal(true)}
+                  className="w-full px-6 py-2.5 rounded-lg border border-brand-500 text-brand-500 dark:text-brand-400 font-semibold hover:bg-brand-50 dark:hover:bg-brand-950/20 transition-colors mb-8"
+                >
+                  Get Started
+                </button>
+
+                <div className="space-y-4">
+                  <div className="flex items-start gap-3">
+                    <svg
+                      className="w-5 h-5 text-success-500 flex-shrink-0 mt-0.5"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M5 13l4 4L19 7"
+                      />
+                    </svg>
+                    <span className="text-gray-600 dark:text-gray-400">
+                      Up to 100 bookings/month
+                    </span>
+                  </div>
+                  <div className="flex items-start gap-3">
+                    <svg
+                      className="w-5 h-5 text-success-500 flex-shrink-0 mt-0.5"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M5 13l4 4L19 7"
+                      />
+                    </svg>
+                    <span className="text-gray-600 dark:text-gray-400">Basic reporting</span>
+                  </div>
+                  <div className="flex items-start gap-3">
+                    <svg
+                      className="w-5 h-5 text-success-500 flex-shrink-0 mt-0.5"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M5 13l4 4L19 7"
+                      />
+                    </svg>
+                    <span className="text-gray-600 dark:text-gray-400">1 user account</span>
+                  </div>
+                  <div className="flex items-start gap-3">
+                    <svg
+                      className="w-5 h-5 text-success-500 flex-shrink-0 mt-0.5"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M5 13l4 4L19 7"
+                      />
+                    </svg>
+                    <span className="text-gray-600 dark:text-gray-400">Email support</span>
+                  </div>
+                  <div className="flex items-start gap-3">
+                    <svg
+                      className="w-5 h-5 text-gray-300 dark:text-gray-700 flex-shrink-0 mt-0.5"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M6 18L18 6M6 6l12 12"
+                      />
+                    </svg>
+                    <span className="text-gray-400 dark:text-gray-600">Advanced analytics</span>
+                  </div>
                 </div>
               </div>
             </div>
+
+            {/* Professional Plan (Featured) */}
+            <div className="relative bg-white dark:bg-gray-900 rounded-xl border-2 border-brand-500 overflow-hidden shadow-lg dark:shadow-lg shadow-brand-500/20 dark:shadow-brand-500/10 transform scale-105 md:scale-100 md:z-10">
+              <div className="absolute top-0 left-0 right-0 bg-gradient-to-r from-brand-500 to-brand-700 dark:from-brand-600 dark:to-brand-800 text-white py-2 text-center text-sm font-semibold">
+                Most Popular
+              </div>
+              <div className="p-8 pt-16">
+                <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
+                  Professional
+                </h3>
+                <p className="text-sm text-gray-600 dark:text-gray-400 mb-6">
+                  Best for growing labs
+                </p>
+
+                <div className="mb-6">
+                  <span className="text-4xl font-bold text-gray-900 dark:text-white">$299</span>
+                  <span className="text-gray-600 dark:text-gray-400">/month</span>
+                </div>
+
+                <button
+                  onClick={() => setShowFreeTrialModal(true)}
+                  className="w-full px-6 py-2.5 rounded-lg bg-gradient-to-r from-brand-500 to-brand-700 text-white font-semibold hover:shadow-lg hover:shadow-brand-500/30 dark:from-brand-600 dark:to-brand-800 transition-all duration-300 mb-8"
+                >
+                  Start Free Trial
+                </button>
+
+                <div className="space-y-4">
+                  <div className="flex items-start gap-3">
+                    <svg
+                      className="w-5 h-5 text-success-500 flex-shrink-0 mt-0.5"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M5 13l4 4L19 7"
+                      />
+                    </svg>
+                    <span className="text-gray-600 dark:text-gray-400">
+                      Up to 1,000 bookings/month
+                    </span>
+                  </div>
+                  <div className="flex items-start gap-3">
+                    <svg
+                      className="w-5 h-5 text-success-500 flex-shrink-0 mt-0.5"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M5 13l4 4L19 7"
+                      />
+                    </svg>
+                    <span className="text-gray-600 dark:text-gray-400">
+                      Advanced analytics & reporting
+                    </span>
+                  </div>
+                  <div className="flex items-start gap-3">
+                    <svg
+                      className="w-5 h-5 text-success-500 flex-shrink-0 mt-0.5"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M5 13l4 4L19 7"
+                      />
+                    </svg>
+                    <span className="text-gray-600 dark:text-gray-400">Up to 5 user accounts</span>
+                  </div>
+                  <div className="flex items-start gap-3">
+                    <svg
+                      className="w-5 h-5 text-success-500 flex-shrink-0 mt-0.5"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M5 13l4 4L19 7"
+                      />
+                    </svg>
+                    <span className="text-gray-600 dark:text-gray-400">Priority email support</span>
+                  </div>
+                  <div className="flex items-start gap-3">
+                    <svg
+                      className="w-5 h-5 text-success-500 flex-shrink-0 mt-0.5"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M5 13l4 4L19 7"
+                      />
+                    </svg>
+                    <span className="text-gray-600 dark:text-gray-400">API access</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Enterprise Plan */}
+            <div className="relative bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 overflow-hidden hover:shadow-lg dark:hover:shadow-lg hover:shadow-gray-300/50 dark:hover:shadow-gray-700/50 transition-all duration-300">
+              <div className="p-8">
+                <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
+                  Enterprise
+                </h3>
+                <p className="text-sm text-gray-600 dark:text-gray-400 mb-6">
+                  For large organizations
+                </p>
+
+                <div className="mb-6">
+                  <span className="text-4xl font-bold text-gray-900 dark:text-white">Custom</span>
+                  <span className="text-gray-600 dark:text-gray-400">/month</span>
+                </div>
+
+                <button
+                  onClick={() => setShowFreeTrialModal(true)}
+                  className="w-full px-6 py-2.5 rounded-lg border border-brand-500 text-brand-500 dark:text-brand-400 font-semibold hover:bg-brand-50 dark:hover:bg-brand-950/20 transition-colors mb-8"
+                >
+                  Contact Sales
+                </button>
+
+                <div className="space-y-4">
+                  <div className="flex items-start gap-3">
+                    <svg
+                      className="w-5 h-5 text-success-500 flex-shrink-0 mt-0.5"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M5 13l4 4L19 7"
+                      />
+                    </svg>
+                    <span className="text-gray-600 dark:text-gray-400">Unlimited bookings</span>
+                  </div>
+                  <div className="flex items-start gap-3">
+                    <svg
+                      className="w-5 h-5 text-success-500 flex-shrink-0 mt-0.5"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M5 13l4 4L19 7"
+                      />
+                    </svg>
+                    <span className="text-gray-600 dark:text-gray-400">Custom integrations</span>
+                  </div>
+                  <div className="flex items-start gap-3">
+                    <svg
+                      className="w-5 h-5 text-success-500 flex-shrink-0 mt-0.5"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M5 13l4 4L19 7"
+                      />
+                    </svg>
+                    <span className="text-gray-600 dark:text-gray-400">
+                      Unlimited user accounts
+                    </span>
+                  </div>
+                  <div className="flex items-start gap-3">
+                    <svg
+                      className="w-5 h-5 text-success-500 flex-shrink-0 mt-0.5"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M5 13l4 4L19 7"
+                      />
+                    </svg>
+                    <span className="text-gray-600 dark:text-gray-400">
+                      Dedicated account manager
+                    </span>
+                  </div>
+                  <div className="flex items-start gap-3">
+                    <svg
+                      className="w-5 h-5 text-success-500 flex-shrink-0 mt-0.5"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M5 13l4 4L19 7"
+                      />
+                    </svg>
+                    <span className="text-gray-600 dark:text-gray-400">24/7 phone support</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Pricing Note */}
+          <div className="text-center mt-12">
+            <p className="text-gray-600 dark:text-gray-400">
+              All plans include a{" "}
+              <span className="font-semibold text-gray-900 dark:text-white">14-day free trial</span>
+              . No credit card required.
+            </p>
           </div>
         </div>
       </section>
@@ -431,7 +773,7 @@ const LandingPage: React.FC = () => {
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link
-              to="/signup"
+              to="/signin"
               className="px-8 py-3.5 rounded-lg bg-white text-brand-600 font-semibold hover:shadow-lg transition-shadow text-center"
             >
               Start Free Trial
@@ -445,6 +787,9 @@ const LandingPage: React.FC = () => {
           </div>
         </div>
       </section>
+
+      {/* Free Trial Modal */}
+      <FreeTrialModal isOpen={showFreeTrialModal} onClose={() => setShowFreeTrialModal(false)} />
 
       {/* Footer */}
       <PublicFooter />

@@ -29,6 +29,12 @@ const PublicHeader: React.FC = () => {
             Benefits
           </a>
           <a
+            href="#pricing"
+            className="text-gray-600 hover:text-brand-500 dark:text-gray-400 dark:hover:text-brand-400 font-medium transition-colors"
+          >
+            Pricing
+          </a>
+          <a
             href="#contact"
             className="text-gray-600 hover:text-brand-500 dark:text-gray-400 dark:hover:text-brand-400 font-medium transition-colors"
           >
@@ -50,7 +56,7 @@ const PublicHeader: React.FC = () => {
           </Link>
 
           <Link
-            to="/signup"
+            to="/signin"
             className="px-4 py-2.5 rounded-lg bg-gradient-to-r from-brand-500 to-brand-700 text-white font-medium hover:shadow-lg dark:from-brand-600 dark:to-brand-800 transition-shadow"
           >
             Sign Up
