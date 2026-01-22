@@ -9,6 +9,7 @@ interface User {
 
 interface AuthContextType {
   user: User | null;
+  loading: boolean;
   login: () => Promise<void>;
   logout: () => Promise<void>;
 }
@@ -22,7 +23,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const fetchMe = async () => {
     try {
       const res = await api.get("/auth/me");
-      console.log('res', res)
+      console.log("res", res);
       setUser(res.data);
     } catch {
       setUser(null);
@@ -36,7 +37,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
     fetchMe();
     console.log("AuthContext end");
-
   }, []);
 
   const login = async () => {
@@ -51,9 +51,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   if (loading) return null; // or loader
 
   return (
-    <AuthContext.Provider value={{ user, login, logout }}>
-      {children}
-    </AuthContext.Provider>
+    <AuthContext.Provider value={{ user, loading, login, logout }}>{children}</AuthContext.Provider>
   );
 };
 
