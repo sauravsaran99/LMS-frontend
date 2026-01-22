@@ -79,7 +79,12 @@ const LandingPage: React.FC = () => {
                 <img
                   src="/images/homepage/header_img.png"
                   alt="Laboratory Management Dashboard"
-                  className="w-full h-full object-cover"
+                  className="w-full h-full object-cover dark:hidden"
+                />
+                <img
+                  src="/images/homepage/header_img2.png"
+                  alt="Laboratory Management Dashboard"
+                  className="w-full h-full object-cover hidden dark:block"
                 />
               </div>
             </div>
@@ -392,9 +397,14 @@ const LandingPage: React.FC = () => {
             <div className="relative hidden lg:block">
               <div className="bg-gradient-to-br from-brand-50 to-blue-light-50 dark:from-gray-800 dark:to-gray-900 rounded-2xl overflow-hidden border border-gray-200 dark:border-gray-800">
                 <img
+                  src="/images/homepage/bottom_img.png"
+                  alt="Why Choose Our LMS Benefits"
+                  className="w-full h-full object-cover dark:hidden"
+                />
+                <img
                   src="/images/homepage/bottom_img2.png"
                   alt="Why Choose Our LMS Benefits"
-                  className="w-full h-full object-cover"
+                  className="w-full h-full object-cover hidden dark:block"
                 />
               </div>
             </div>
