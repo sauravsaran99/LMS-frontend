@@ -12,7 +12,7 @@ const ProtectedRoute = ({ children, roles }: ProtectedRouteProps) => {
 
   // 🔄 wait until auth state is resolved
   if (loading) {
-    return null; // or loader
+    return <div>Loading...</div>;
   }
 
   // 🔐 not logged in
