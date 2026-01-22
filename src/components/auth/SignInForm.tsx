@@ -20,29 +20,17 @@ export default function SignInForm() {
   const { login } = useAuth();
 
   const handleSubmit = async (e: any) => {
-    e.preventDefault(); // 🔥 STOP page reload
-
-    try {
-      // Validate inputs
-      if (!email || !password) {
-        toast.error("Please fill in all fields");
-        return;
-      }
-
-      console.log("calling api");
-      const response = await api.post("/auth/login", {
-        email,
-        password,
-      });
-
-      await login();
+    e.preventDefault();
+    if (!email || !password) {
+      toast.error("Please fill in all fields");
+      return;
+    }
+    const success = await login(email, password);
+    if (success) {
       toast.success("Login successful!");
       navigate("/");
-    } catch (error: any) {
-      const errorMessage =
-        error?.response?.data?.message || error?.message || "Login failed. Please try again.";
-      toast.error(errorMessage);
-      console.error("Login error:", error);
+    } else {
+      toast.error("Login failed. Please check your credentials.");
     }
   };
 
