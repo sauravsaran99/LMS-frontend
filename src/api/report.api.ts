@@ -60,8 +60,11 @@ export const getTestMonthlyReport = (fromDate: string, toDate: string) => {
   });
 };
 
-export const uploadReport = (bookingId: number, file: File) => {
+export const uploadReport = (bookingId: number, file: File, taggedDoctorId?: number) => {
   const fd = new FormData();
   fd.append("report", file);
+  if (taggedDoctorId) {
+    fd.append("tagged_doctor_id", String(taggedDoctorId));
+  }
   return api.post(`/bookings/technician/${bookingId}/upload-report`, fd);
 };
