@@ -6,6 +6,7 @@ import Label from "../form/Label";
 import Input from "../form/input/InputField";
 import Checkbox from "../form/input/Checkbox";
 import Button from "../ui/button/Button";
+import Loader from "../common/Loader";
 
 import api from "../../api/axios";
 import { useAuth } from "../../context/AuthContext";
@@ -15,6 +16,7 @@ export default function SignInForm() {
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [isChecked, setIsChecked] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   const navigate = useNavigate();
   const { login } = useAuth();
@@ -25,12 +27,14 @@ export default function SignInForm() {
       toast.error("Please fill in all fields");
       return;
     }
+    setLoading(true);
     const success = await login(email, password);
     if (success) {
       toast.success("Login successful!");
       navigate("/");
     } else {
       toast.error("Login failed. Please check your credentials.");
+      setLoading(false);
     }
   };
 
@@ -159,8 +163,14 @@ export default function SignInForm() {
                   </Link>
                 </div> */}
                 <div>
-                  <Button className="w-full" size="sm" type="submit">
-                    Sign in
+                  <Button
+                    className="w-full"
+                    size="sm"
+                    type="submit"
+                    disabled={loading}
+                    startIcon={loading ? <Loader className="text-white size-5" /> : null}
+                  >
+                    {loading ? "Signing in..." : "Sign in"}
                   </Button>
                 </div>
               </div>
