@@ -7,7 +7,11 @@ export const createBranchUser = (data: {
   email: string;
   password: string;
   role: "RECEPTIONIST" | "TECHNICIAN";
+  branchIds?: number[];
 }) => api.post("/branch-admin/users", data);
+
+export const updateBranchUser = (id: number, data: any) =>
+  api.put(`/branch-admin/users/${id}`, data);
 
 export const toggleUserStatus = (id: number) => api.patch(`/branch-admin/users/${id}/status`);
 

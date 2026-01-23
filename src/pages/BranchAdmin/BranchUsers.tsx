@@ -7,6 +7,7 @@ import toast from "react-hot-toast";
 const BranchUsers = () => {
   const [users, setUsers] = useState<any[]>([]);
   const [open, setOpen] = useState(false);
+  const [editingUser, setEditingUser] = useState<any>(null);
 
   const loadUsers = async () => {
     const res = await getBranchUsers();
@@ -23,6 +24,16 @@ const BranchUsers = () => {
     loadUsers();
   };
 
+  const handleEdit = (user: any) => {
+    setEditingUser(user);
+    setOpen(true);
+  };
+
+  const handleAdd = () => {
+    setEditingUser(null);
+    setOpen(true);
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -32,7 +43,7 @@ const BranchUsers = () => {
             Manage your branch staff members
           </p>
         </div>
-        <Button variant="primary" onClick={() => setOpen(true)}>
+        <Button variant="primary" onClick={handleAdd}>
           + Add User
         </Button>
       </div>
@@ -79,16 +90,21 @@ const BranchUsers = () => {
                     </td>
                     <td className="px-6 py-4 text-sm">
                       <span
-                        className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-medium ${
-                          u.is_active == true
+                        className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-medium ${u.is_active == true
                             ? "bg-success-50 text-success-700 dark:bg-success-900/30 dark:text-success-400"
                             : "bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400"
-                        }`}
+                          }`}
                       >
                         {u.is_active == true ? "Active" : "Inactive"}
                       </span>
                     </td>
-                    <td className="px-6 py-4 text-sm">
+                    <td className="px-6 py-4 text-sm flex gap-2">
+                      <button
+                        onClick={() => handleEdit(u)}
+                        className="inline-flex items-center justify-center gap-2 rounded-lg border border-gray-300 bg-white px-3 py-2 text-xs font-medium text-gray-700 shadow-theme-xs hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:hover:bg-white/[0.03] transition-colors"
+                      >
+                        Edit
+                      </button>
                       <button
                         onClick={() => toggleStatus(u)}
                         className="inline-flex items-center justify-center gap-2 rounded-lg border border-gray-300 bg-white px-3 py-2 text-xs font-medium text-gray-700 shadow-theme-xs hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:hover:bg-white/[0.03] transition-colors"
@@ -112,7 +128,13 @@ const BranchUsers = () => {
         </div>
       </div>
 
-      {open && <UserFormModal onClose={() => setOpen(false)} onSuccess={loadUsers} />}
+      {open && (
+        <UserFormModal
+          onClose={() => setOpen(false)}
+          onSuccess={loadUsers}
+          user={editingUser}
+        />
+      )}
     </div>
   );
 };

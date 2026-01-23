@@ -7,15 +7,45 @@ const UploadReportModal = ({ booking, onClose, onSuccess }: any) => {
   const [isLoading, setIsLoading] = useState(false);
   const [dragActive, setDragActive] = useState(false);
 
+  const [tagType, setTagType] = useState<"SELF" | "DOCTOR">("SELF");
+  const [doctors, setDoctors] = useState<{ id: number; name: string; specialization?: string }[]>(
+    []
+  );
+  const [selectedDoctorId, setSelectedDoctorId] = useState<number | null>(null);
+
+  // Fetch doctors
+  useState(() => {
+    const fetchDoctors = async () => {
+      try {
+        const { data } = await import("../../api/doctor.api").then((mod) =>
+          mod.getDoctors()
+        );
+        setDoctors(data);
+      } catch (e) {
+        console.error("Failed to fetch doctors", e);
+      }
+    };
+    fetchDoctors();
+  });
+
   const submit = async () => {
     if (!file) {
       toast.error("Please select a report file");
       return;
     }
 
+    if (tagType === "DOCTOR" && !selectedDoctorId) {
+      toast.error("Please select a doctor");
+      return;
+    }
+
     setIsLoading(true);
     try {
-      await uploadReport(booking.id, file);
+      await uploadReport(
+        booking.id,
+        file,
+        tagType === "DOCTOR" ? selectedDoctorId! : undefined
+      );
       toast.success("Report uploaded successfully");
       onSuccess();
       onClose();
@@ -107,11 +137,10 @@ const UploadReportModal = ({ booking, onClose, onSuccess }: any) => {
               onDragLeave={handleDrag}
               onDragOver={handleDrag}
               onDrop={handleDrop}
-              className={`relative rounded-xl border-2 border-dashed p-8 transition-all ${
-                dragActive
-                  ? "border-purple-500 bg-purple-50 dark:bg-purple-900/20"
-                  : "border-gray-300 dark:border-gray-700 bg-gray-50/50 dark:bg-white/[0.03] hover:border-purple-300 dark:hover:border-purple-600"
-              }`}
+              className={`relative rounded-xl border-2 border-dashed p-8 transition-all ${dragActive
+                ? "border-purple-500 bg-purple-50 dark:bg-purple-900/20"
+                : "border-gray-300 dark:border-gray-700 bg-gray-50/50 dark:bg-white/[0.03] hover:border-purple-300 dark:hover:border-purple-600"
+                }`}
             >
               <input
                 id="file-input"
@@ -198,6 +227,56 @@ const UploadReportModal = ({ booking, onClose, onSuccess }: any) => {
                 </div>
               </div>
             )}
+
+            {/* Tagging Options */}
+            <div>
+              <label className="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
+                Tag Report To
+              </label>
+              <div className="flex gap-4 mb-3">
+                <label className="flex items-center gap-2 cursor-pointer">
+                  <input
+                    type="radio"
+                    name="tagType"
+                    value="SELF"
+                    checked={tagType === "SELF"}
+                    onChange={() => setTagType("SELF")}
+                    className="w-4 h-4 text-purple-600 focus:ring-purple-500 border-gray-300 rounded-full"
+                  />
+                  <span className="text-sm text-gray-700 dark:text-gray-300">Self (Patient)</span>
+                </label>
+                <label className="flex items-center gap-2 cursor-pointer">
+                  <input
+                    type="radio"
+                    name="tagType"
+                    value="DOCTOR"
+                    checked={tagType === "DOCTOR"}
+                    onChange={() => setTagType("DOCTOR")}
+                    className="w-4 h-4 text-purple-600 focus:ring-purple-500 border-gray-300 rounded-full"
+                  />
+                  <span className="text-sm text-gray-700 dark:text-gray-300">Doctor</span>
+                </label>
+              </div>
+
+              {tagType === "DOCTOR" && (
+                <div className="animation-fade-in">
+                  <select
+                    value={selectedDoctorId || ""}
+                    onChange={(e) => setSelectedDoctorId(Number(e.target.value))}
+                    className="w-full h-10 rounded-lg border border-gray-300 bg-transparent px-3 text-sm focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 dark:border-gray-700 dark:bg-gray-800 dark:text-white transition-colors"
+                  >
+                    <option value="" disabled>
+                      Select a Doctor
+                    </option>
+                    {doctors?.data.map((doctor) => (
+                      <option key={doctor.id} value={doctor.id}>
+                        {doctor.name} ({doctor.specialization || "General"})
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              )}
+            </div>
 
             {/* Info Alert */}
             <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800/50 rounded-lg p-3 flex gap-2">
