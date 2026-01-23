@@ -35,7 +35,7 @@ const PublicHeader: React.FC = () => {
             Pricing
           </a>
           <a
-            href="contact"
+            href="/contact"
             className="text-gray-600 hover:text-brand-500 dark:text-gray-400 dark:hover:text-brand-400 font-medium transition-colors"
           >
             Contact
