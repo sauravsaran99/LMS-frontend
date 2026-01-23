@@ -30,6 +30,15 @@ import CustomerPayments from "./pages/customer/Payments";
 import CustomerReports from "./pages/customer/Reports";
 import BookingDetails from "./pages/customer/BookingDetails";
 import BranchAdmins from "./pages/Admin/BranchAdmins/BranchAdmins";
+import About from "./pages/OtherPage/About";
+import Blog from "./pages/OtherPage/Blog";
+import Careers from "./pages/OtherPage/Careers";
+import Privacy from "./pages/OtherPage/Privacy";
+import Terms from "./pages/OtherPage/Terms";
+
+import Contact from "./pages/OtherPage/Contact";
+import BlogList from "./pages/Admin/Blog/BlogList";
+import ContactQueries from "./pages/Admin/ContactQueries/ContactQueries";
 
 export default function App() {
   return (
@@ -200,6 +209,24 @@ export default function App() {
             />
 
             <Route
+              path="/admin/blogs"
+              element={
+                <ProtectedRoute roles={["SUPER_ADMIN"]}>
+                  <BlogList />
+                </ProtectedRoute>
+              }
+            />
+
+            <Route
+              path="/admin/contacts"
+              element={
+                <ProtectedRoute roles={["SUPER_ADMIN"]}>
+                  <ContactQueries />
+                </ProtectedRoute>
+              }
+            />
+
+            <Route
               path="/branch-admin/users"
               element={
                 <ProtectedRoute roles={["BRANCH_ADMIN"]}>
@@ -259,6 +286,54 @@ export default function App() {
             element={
               <PublicRoute>
                 <SignUp />
+              </PublicRoute>
+            }
+          />
+          <Route
+            path="/about"
+            element={
+              <PublicRoute>
+                <About />
+              </PublicRoute>
+            }
+          />
+          <Route
+            path="/blog"
+            element={
+              <PublicRoute>
+                <Blog />
+              </PublicRoute>
+            }
+          />
+          <Route
+            path="/careers"
+            element={
+              <PublicRoute>
+                <Careers />
+              </PublicRoute>
+            }
+          />
+          <Route
+            path="/privacy"
+            element={
+              <PublicRoute>
+                <Privacy />
+              </PublicRoute>
+            }
+          />
+          <Route
+            path="/terms"
+            element={
+              <PublicRoute>
+                <Terms />
+              </PublicRoute>
+            }
+          />
+          <Route
+            path="/contact"
+            element={
+              <PublicRoute>
+                <Contact />
               </PublicRoute>
             }
           />
