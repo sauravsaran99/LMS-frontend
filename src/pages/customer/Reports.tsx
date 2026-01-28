@@ -21,9 +21,9 @@ const CustomerReports = () => {
         const bookingsRes = await getCustomerBookings();
         const all: Report[] = [];
 
-        for (const b of bookingsRes.data) {
+        for (const b of bookingsRes.data.data) {
           const r = await getCustomerBookingReports(b.id);
-          const reportsWithBookingNumber = r.data.map((report: Report) => ({
+          const reportsWithBookingNumber = r.data.data.map((report: Report) => ({
             ...report,
             booking_number: b.booking_number,
           }));
@@ -41,19 +41,24 @@ const CustomerReports = () => {
     load();
   }, []);
 
-  const downloadReport = (fileUrl: string, fileName: string) => {
-    try {
-      const link = document.createElement("a");
-      link.href = `/${fileUrl}`;
-      link.download = fileName || "report";
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      toast.success("Report downloaded");
-    } catch (error) {
-      toast.error("Failed to download report");
-    }
-  };
+const downloadReport = (fileUrl: string, fileName?: string) => {
+  try {
+    const baseUrl = import.meta.env.VITE_API_BASE_URL; // http://localhost:5000
+
+    const link = document.createElement("a");
+    link.href = `${baseUrl}/${fileUrl}`;
+    link.download = fileName || fileUrl.split("/").pop() || "report";
+
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+
+    toast.success("Report downloaded");
+  } catch (error) {
+    toast.error("Failed to download report");
+  }
+};
+
 
   const formatDate = (date: string) => {
     try {

@@ -1,6 +1,7 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 import { uploadReport } from "../../api/report.api";
+import { getDoctors } from "../../api/doctor.api";
 
 const UploadReportModal = ({ booking, onClose, onSuccess }: any) => {
   const [file, setFile] = useState<File | null>(null);
@@ -13,20 +14,20 @@ const UploadReportModal = ({ booking, onClose, onSuccess }: any) => {
   );
   const [selectedDoctorId, setSelectedDoctorId] = useState<number | null>(null);
 
-  // Fetch doctors
-  useState(() => {
-    const fetchDoctors = async () => {
+      const fetchDoctors = async () => {
       try {
-        const { data } = await import("../../api/doctor.api").then((mod) =>
-          mod.getDoctors()
-        );
+        const { data } = await getDoctors({ page: 1, limit: 100 });
         setDoctors(data);
       } catch (e) {
         console.error("Failed to fetch doctors", e);
       }
     };
+
+  // Fetch doctors
+  useEffect(() => {
+
     fetchDoctors();
-  });
+  }, [setTagType]);
 
   const submit = async () => {
     if (!file) {

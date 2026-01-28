@@ -13,7 +13,7 @@ const MyBookings = () => {
     const load = async () => {
       try {
         const res = await getCustomerBookings();
-        setBookings(res.data);
+        setBookings(res.data.data);
       } catch (error) {
         toast.error("Failed to load bookings");
       } finally {
