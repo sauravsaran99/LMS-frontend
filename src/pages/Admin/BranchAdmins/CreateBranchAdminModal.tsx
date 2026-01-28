@@ -27,6 +27,8 @@ const CreateBranchAdminModal = ({ onClose, onSuccess }: any) => {
     try {
       const { data } = await getBranches({ page: currentPage, limit: 10 });
 
+      console.log(' Fetched branches:', data);
+
       let newBranches: any[] = [];
       if (data.data) {
         newBranches = data.data;
