@@ -17,8 +17,8 @@ const BookingDetails = () => {
       try {
         const testsRes = await getCustomerBookingTests(Number(id));
         const reportsRes = await getCustomerBookingReports(Number(id));
-        setTests(testsRes.data);
-        setReports(reportsRes.data);
+        setTests(testsRes.data.data);
+        setReports(reportsRes.data.data);
       } catch (error) {
         toast.error("Failed to load booking details");
       } finally {
@@ -28,19 +28,23 @@ const BookingDetails = () => {
     load();
   }, [id]);
 
-  const downloadReport = (fileUrl: string, fileName: string) => {
-    try {
-      const link = document.createElement("a");
-      link.href = `/${fileUrl}`;
-      link.download = fileName || "report";
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      toast.success("Report downloaded");
-    } catch (error) {
-      toast.error("Failed to download report");
-    }
-  };
+const downloadReport = (fileUrl: string, fileName?: string) => {
+  try {
+    const baseUrl = import.meta.env.VITE_API_BASE_URL; // http://localhost:5000
+
+    const link = document.createElement("a");
+    link.href = `${baseUrl}/${fileUrl}`;
+    link.download = fileName || fileUrl.split("/").pop() || "report";
+
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+
+    toast.success("Report downloaded");
+  } catch (error) {
+    toast.error("Failed to download report");
+  }
+};
 
   return (
     <>

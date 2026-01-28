@@ -22,9 +22,9 @@ const CustomerPayments = () => {
         const bookingsRes = await getCustomerBookings();
         const allPayments: Payment[] = [];
 
-        for (const b of bookingsRes.data) {
+        for (const b of bookingsRes.data.data) {
           const p = await getCustomerBookingPayments(b.booking_number);
-          allPayments.push(...p.data);
+          allPayments.push(...p.data.data);
         }
 
         setPayments(allPayments);
