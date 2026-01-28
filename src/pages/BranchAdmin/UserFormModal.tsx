@@ -5,6 +5,7 @@ import Input from "../../components/form/input/InputField";
 import Label from "../../components/form/Label";
 import Button from "../../components/ui/button/Button";
 import toast from "react-hot-toast";
+import { getBranches } from "../../api/branch.api";
 
 interface UserFormModalProps {
   onClose: () => void;
@@ -31,11 +32,9 @@ const UserFormModal = ({ onClose, onSuccess, user }: UserFormModalProps) => {
     if (isFetchingBranches) return;
     setIsFetchingBranches(true);
     try {
-      const { data } = await import("../../api/branch.api").then((mod) =>
-        mod.getBranches({ page: currentPage, limit: 10 })
-      );
+       const { data } = await getBranches({ page: currentPage, limit: 10 });
 
-      console.log("[DEBUG] API Response Data:", data);
+      // console.log("[DEBUG] API Response Data:", data);
 
       let newBranches: { id: number; name: string }[] = [];
       if (data.data) {
