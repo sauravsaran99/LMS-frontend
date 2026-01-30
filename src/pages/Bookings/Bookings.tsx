@@ -6,6 +6,7 @@ import PageMeta from "../../components/common/PageMeta";
 import DatePicker from "../../components/form/date-picker";
 import TimePicker from "../../components/form/time-picker";
 import CreatePaymentModal from "../Payments/CreatePaymentModal";
+import CustomerFormModal from "../Customers/CustomerFormModal";
 
 const Bookings = () => {
   const [query, setQuery] = useState("");
@@ -31,6 +32,7 @@ const Bookings = () => {
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
   const [showPaymentModal, setShowPaymentModal] = useState(false);
+  const [showCustomerModal, setShowCustomerModal] = useState(false);
   const [bookingNumber, setBookingNumber] = useState<string | null>(null);
 
   const loadTests = useCallback(
@@ -257,6 +259,12 @@ const Bookings = () => {
                   >
                     Search
                   </button>
+                  <button
+                    onClick={() => setShowCustomerModal(true)}
+                    className="rounded-lg bg-white border border-blue-600 px-4 sm:px-6 py-2.5 text-sm font-medium text-blue-600 transition-all hover:bg-blue-50 active:scale-95 whitespace-nowrap dark:bg-transparent dark:text-blue-400 dark:border-blue-400 dark:hover:bg-blue-900/20"
+                  >
+                    + New
+                  </button>
                 </div>
 
                 {/* Selected Customer Display */}
@@ -418,6 +426,7 @@ const Bookings = () => {
                   mode="single"
                   label="Booking Date"
                   placeholder="Select date"
+                  minDate="today"
                   onChange={(selectedDates) => {
                     if (selectedDates[0]) {
                       const date = selectedDates[0];
@@ -612,6 +621,18 @@ const Bookings = () => {
       {/* Payment Modal */}
       {showPaymentModal && (
         <CreatePaymentModal bookingNumber={bookingNumber} onClose={resetBookingForm} />
+      )}
+
+      {/* New Customer Modal */}
+      {showCustomerModal && (
+        <CustomerFormModal
+          isOpen={showCustomerModal}
+          onClose={() => setShowCustomerModal(false)}
+          onSuccess={(customer: Customer) => {
+            setSelectedCustomer(customer);
+            // Optionally clear the search query or do other cleanup
+          }}
+        />
       )}
     </>
   );

@@ -1,15 +1,26 @@
 import { useEffect, useState } from "react";
-import { updateCustomer } from "../../api/customer.api";
+import { createCustomer, updateCustomer } from "../../api/customer.api"; // Updated import
 import { Modal } from "../../components/ui/modal";
 import toast from "react-hot-toast";
 
-const CustomerFormModal = ({ initialData, isOpen, onClose, onSuccess }: any) => {
+import { Customer } from "../../types/customer";
+
+interface CustomerFormModalProps {
+  initialData?: Customer;
+  isOpen: boolean;
+  onClose: () => void;
+  onSuccess?: (customer: Customer) => void;
+}
+
+const CustomerFormModal = ({ initialData, isOpen, onClose, onSuccess }: CustomerFormModalProps) => {
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
   const [age, setAge] = useState<number | "">("");
   const [gender, setGender] = useState("");
   const [address, setAddress] = useState("");
   const [loading, setLoading] = useState(false);
+
+  const isEditMode = !!initialData; // Determine mode based on initialData
 
   useEffect(() => {
     if (initialData) {
@@ -18,8 +29,15 @@ const CustomerFormModal = ({ initialData, isOpen, onClose, onSuccess }: any) => 
       setAge(initialData.age || "");
       setGender(initialData.gender || "");
       setAddress(initialData.address || "");
+    } else {
+      // Reset form for create mode
+      setName("");
+      setPhone("");
+      setAge("");
+      setGender("");
+      setAddress("");
     }
-  }, [initialData]);
+  }, [initialData, isOpen]); // Added isOpen to reset when opening fresh
 
   const validateForm = () => {
     if (!name.trim()) return "Customer name is required";
@@ -37,18 +55,28 @@ const CustomerFormModal = ({ initialData, isOpen, onClose, onSuccess }: any) => 
 
     try {
       setLoading(true);
-      await updateCustomer(initialData.id, {
+      const payload = {
         name: name.trim(),
         phone: phone.trim(),
         age: age || undefined,
         gender: gender || undefined,
         address: address.trim() || undefined,
-      });
-      toast.success("Customer updated successfully");
-      onSuccess?.();
+      };
+
+      let response;
+      if (isEditMode) {
+        response = await updateCustomer(initialData.id, payload);
+        toast.success("Customer updated successfully");
+      } else {
+        response = await createCustomer(payload);
+        toast.success("Customer created successfully");
+      }
+
+      onSuccess?.(response.data.customer); // Pass back the customer data
       onClose();
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (err: any) {
-      toast.error(err.response?.data?.message || "Failed to update customer");
+      toast.error(err.response?.data?.message || `Failed to ${isEditMode ? 'update' : 'create'} customer`);
     } finally {
       setLoading(false);
     }
@@ -59,10 +87,10 @@ const CustomerFormModal = ({ initialData, isOpen, onClose, onSuccess }: any) => 
       <div className="p-6 sm:p-8">
         <div className="mb-6">
           <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
-            Edit Customer
+            {isEditMode ? "Edit Customer" : "Add New Customer"}
           </h2>
           <p className="text-gray-600 dark:text-gray-400 text-sm mt-1">
-            Update customer information below
+            {isEditMode ? "Update customer information below" : "Enter customer details below"}
           </p>
         </div>
 
