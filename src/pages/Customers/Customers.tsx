@@ -41,7 +41,7 @@ const Customers = () => {
       setLoading(true);
       setError("");
       const res = await searchCustomers(query);
-      setCustomers(res.data);
+      setCustomers(res.data.data);
     } catch {
       toast.error("Failed to search customers");
     } finally {
