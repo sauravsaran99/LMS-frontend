@@ -5,12 +5,15 @@ import toast from "react-hot-toast";
 import PageMeta from "../../../components/common/PageMeta";
 import { Modal } from "../../../components/ui/modal";
 import TestFormModal from "./TestFormModal";
+import BranchPriceModal from "./BranchPriceModal";
 
 const Tests = () => {
   const [tests, setTests] = useState<Test[]>([]);
   const [loading, setLoading] = useState(false);
   const [showModal, setShowModal] = useState(false);
   const [editingTest, setEditingTest] = useState<Test | null>(null);
+  const [branchPriceTest, setBranchPriceTest] = useState<Test | null>(null);
+  const [showBranchModal, setShowBranchModal] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
@@ -249,6 +252,28 @@ const Tests = () => {
                               </svg>
                               Edit
                             </button>
+                            <button
+                              onClick={() => {
+                                setBranchPriceTest(t);
+                                setShowBranchModal(true);
+                              }}
+                              className="inline-flex items-center gap-1 rounded-lg bg-blue-100 dark:bg-blue-900/30 px-3 py-1.5 text-xs font-medium text-blue-700 dark:text-blue-400 transition-all hover:bg-blue-200 dark:hover:bg-blue-900/50 active:scale-95"
+                            >
+                              <svg
+                                className="w-4 h-4"
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
+                              >
+                                <path
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
+                                  strokeWidth={2}
+                                  d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"
+                                />
+                              </svg>
+                              Branch Price
+                            </button>
                           </div>
                         </td>
                       </tr>
@@ -292,6 +317,18 @@ const Tests = () => {
           }}
         />
       </Modal>
+
+      {/* Branch Price Modal */}
+      {branchPriceTest && (
+        <BranchPriceModal
+          isOpen={showBranchModal}
+          test={branchPriceTest}
+          onClose={() => {
+            setShowBranchModal(false);
+            setBranchPriceTest(null);
+          }}
+        />
+      )}
     </>
   );
 };

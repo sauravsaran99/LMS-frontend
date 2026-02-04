@@ -12,6 +12,8 @@ const Bookings = () => {
   const [query, setQuery] = useState("");
   const [customers, setCustomers] = useState<Customer[]>([]);
   const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(null);
+  const [isSearching, setIsSearching] = useState(false);
+  const [searchPerformed, setSearchPerformed] = useState(false);
 
   const [tests, setTests] = useState<Test[]>([]);
   const [selectedTests, setSelectedTests] = useState<number[]>([]);
@@ -36,14 +38,16 @@ const Bookings = () => {
   const [bookingNumber, setBookingNumber] = useState<string | null>(null);
 
   const loadTests = useCallback(
-    async (page: number = 1, isInfinite: boolean = false) => {
+    async (page: number = 1, isInfinite: boolean = false, branchId?: number) => {
       try {
         if (isInfinite) {
           setTestIsLoadingMore(true);
         } else {
           setLoading(true);
         }
-        const res = await getTests({ page, limit: testLimit });
+
+        console.log("Fetching tests with branch_id:", branchId);
+        const res = await getTests({ page, limit: testLimit, branch_id: branchId });
         console.log("Tests API Response:", res.data);
 
         let newTests: Test[] = [];
@@ -81,8 +85,14 @@ const Bookings = () => {
   );
 
   useEffect(() => {
-    loadTests(1, false);
-  }, [loadTests]);
+    // If a customer is selected, pass their branch_id. If coming from infinite scroll (page > 1), keep current context.
+    // However, this effect runs on component mount and selectedCustomer change.
+    // When selectedCustomer changes, we should reset to page 1.
+    const branchId = selectedCustomer?.branch_id;
+    console.log("Customer changed, reloading tests for branch:", branchId);
+    setTestPage(1); // Reset page on context change
+    loadTests(1, false, branchId);
+  }, [loadTests, selectedCustomer]);
 
   // Intersection Observer for tests infinite scroll
   useEffect(() => {
@@ -92,7 +102,8 @@ const Bookings = () => {
       (entries) => {
         const entry = entries[0];
         if (entry.isIntersecting && testHasMore && !testIsLoadingMore && !loading) {
-          loadTests(testPage + 1, true);
+          const branchId = selectedCustomer?.branch_id;
+          loadTests(testPage + 1, true, branchId);
         }
       },
       {
@@ -109,8 +120,17 @@ const Bookings = () => {
   }, [testHasMore, testIsLoadingMore, loading, testPage, loadTests]);
 
   const handleCustomerSearch = async () => {
-    const res = await searchCustomers(query);
-    setCustomers(res.data.data);
+    if (!query.trim()) return;
+    try {
+      setIsSearching(true);
+      setSearchPerformed(true);
+      const res = await searchCustomers(query);
+      setCustomers(res.data.data);
+    } catch {
+      toast.error("Search failed");
+    } finally {
+      setIsSearching(false);
+    }
   };
 
   const handleTestToggle = (id: number) => {
@@ -267,6 +287,12 @@ const Bookings = () => {
                   </button>
                 </div>
 
+                {isSearching && (
+                  <div className="flex justify-center py-2">
+                    <div className="w-5 h-5 border-2 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
+                  </div>
+                )}
+
                 {/* Selected Customer Display */}
                 {selectedCustomer && (
                   <div className="rounded-lg bg-gradient-to-r from-blue-50 to-blue-100 dark:from-blue-900/20 dark:to-blue-800/20 border border-blue-200 dark:border-blue-700 p-3 sm:p-4">
@@ -282,15 +308,26 @@ const Bookings = () => {
                           {selectedCustomer.phone}
                         </p>
                       </div>
-                      <button
-                        onClick={() => {
-                          setSelectedCustomer(null);
-                          setQuery("");
-                        }}
-                        className="text-blue-600 hover:text-blue-700 dark:text-blue-400 flex-shrink-0"
-                      >
-                        ✕
-                      </button>
+                      <div className="flex items-center gap-2 flex-shrink-0">
+                        <button
+                          onClick={() => setShowCustomerModal(true)}
+                          className="p-1.5 rounded-lg bg-white dark:bg-gray-800 border border-blue-200 dark:border-blue-700 text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/30 transition-colors"
+                          title="Edit Customer"
+                        >
+                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                          </svg>
+                        </button>
+                        <button
+                          onClick={() => {
+                            setSelectedCustomer(null);
+                            setQuery("");
+                          }}
+                          className="p-1.5 rounded-lg bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-500 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/30 transition-colors"
+                        >
+                          ✕
+                        </button>
+                      </div>
                     </div>
                   </div>
                 )}
@@ -316,6 +353,21 @@ const Bookings = () => {
                         </p>
                       </button>
                     ))}
+                  </div>
+                )}
+
+                {searchPerformed && customers.length === 0 && !selectedCustomer && !isSearching && (
+                  <div className="rounded-lg border border-dashed border-gray-300 dark:border-gray-700 p-6 text-center bg-gray-50/50 dark:bg-gray-800/10">
+                    <p className="text-sm text-gray-600 dark:text-gray-400 mb-3">No customer found for "{query}"</p>
+                    <button
+                      onClick={() => setShowCustomerModal(true)}
+                      className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-blue-600 text-white text-sm font-medium hover:bg-blue-700 transition-colors"
+                    >
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                      </svg>
+                      Add New Customer
+                    </button>
                   </div>
                 )}
               </div>
@@ -627,10 +679,11 @@ const Bookings = () => {
       {showCustomerModal && (
         <CustomerFormModal
           isOpen={showCustomerModal}
+          initialData={selectedCustomer || undefined}
           onClose={() => setShowCustomerModal(false)}
           onSuccess={(customer: Customer) => {
             setSelectedCustomer(customer);
-            // Optionally clear the search query or do other cleanup
+            setShowCustomerModal(false);
           }}
         />
       )}

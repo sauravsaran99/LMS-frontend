@@ -2,7 +2,7 @@ import api from "./axios";
 
 export const searchCustomers = (q: string) => api.get(`/customers/search?q=${q}`);
 
-export const getTests = (params?: { page?: number; limit?: number }) =>
+export const getTests = (params?: { page?: number; limit?: number; branch_id?: number }) =>
   api.get("/tests", { params });
 
 export const previewDiscount = (payload: any) => api.post("/discounts/preview", payload);

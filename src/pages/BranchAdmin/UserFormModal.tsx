@@ -32,7 +32,7 @@ const UserFormModal = ({ onClose, onSuccess, user }: UserFormModalProps) => {
     if (isFetchingBranches) return;
     setIsFetchingBranches(true);
     try {
-       const { data } = await getBranches({ page: currentPage, limit: 10 });
+      const { data } = await getBranches({ page: currentPage, limit: 10 });
 
       // console.log("[DEBUG] API Response Data:", data);
 

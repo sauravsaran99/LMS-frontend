@@ -85,14 +85,14 @@ const BranchUsers = () => {
                     </td>
                     <td className="px-6 py-4 text-sm">
                       <span className="inline-flex items-center rounded-full px-3 py-1 text-xs font-medium bg-blue-50 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400">
-                        {u.Role.name === "RECEPTIONIST" ? "Receptionist" : "Technician"}
+                        {u.Role?.name === "RECEPTIONIST" ? "Receptionist" : "Technician"}
                       </span>
                     </td>
                     <td className="px-6 py-4 text-sm">
                       <span
                         className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-medium ${u.is_active == true
-                            ? "bg-success-50 text-success-700 dark:bg-success-900/30 dark:text-success-400"
-                            : "bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400"
+                          ? "bg-success-50 text-success-700 dark:bg-success-900/30 dark:text-success-400"
+                          : "bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400"
                           }`}
                       >
                         {u.is_active == true ? "Active" : "Inactive"}

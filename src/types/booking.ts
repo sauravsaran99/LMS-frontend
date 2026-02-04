@@ -2,6 +2,7 @@ export interface Customer {
   id: number;
   name: string;
   phone: string;
+  branch_id?: number;
 }
 
 export interface Test {
