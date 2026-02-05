@@ -12,4 +12,5 @@ export interface Customer {
     country?: string;
     state_code?: string;
     base_branch_id?: number;
+    remarks?: string;
 }

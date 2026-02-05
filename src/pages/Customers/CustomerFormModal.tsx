@@ -24,6 +24,7 @@ const CustomerFormModal = ({ initialData, isOpen, onClose, onSuccess }: Customer
   const [city, setCity] = useState("");
   const [state, setState] = useState("");
   const [country, setCountry] = useState("India");
+  const [remarks, setRemarks] = useState("");
   const [stateCode, setStateCode] = useState("");
   const [profileImage, setProfileImage] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string>("");
@@ -48,6 +49,7 @@ const CustomerFormModal = ({ initialData, isOpen, onClose, onSuccess }: Customer
       setCity(initialData.city || "");
       setState(initialData.state || "");
       setCountry(initialData.country || "India");
+      setRemarks(initialData.remarks || "");
       setStateCode(initialData.state_code || "");
       const baseUrl = import.meta.env.VITE_API_BASE_URL || "http://localhost:5000";
       setImagePreview(initialData.profile_image ? `${baseUrl}${initialData.profile_image}` : "");
@@ -66,6 +68,7 @@ const CustomerFormModal = ({ initialData, isOpen, onClose, onSuccess }: Customer
       setProfileImage(null);
       setImagePreview("");
       setBranchId("");
+      setRemarks("")
     }
   }, [initialData, isOpen]);
 
@@ -138,6 +141,7 @@ const CustomerFormModal = ({ initialData, isOpen, onClose, onSuccess }: Customer
       if (city) formData.append("city", city);
       if (state) formData.append("state", state);
       if (country) formData.append("country", country);
+      if (remarks) formData.append("remarks", remarks.trim());
       if (stateCode) formData.append("state_code", stateCode);
       if (profileImage) formData.append("profile_image", profileImage);
       if (isSuperAdmin && branchId) formData.append("base_branch_id", String(branchId));
@@ -361,6 +365,20 @@ const CustomerFormModal = ({ initialData, isOpen, onClose, onSuccess }: Customer
               rows={2}
               value={address}
               onChange={(e) => setAddress(e.target.value)}
+            />
+          </div>
+
+          {/* Remarks */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              Remarks
+            </label>
+            <textarea
+              className="w-full rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm text-gray-900 placeholder-gray-500 transition-colors hover:border-gray-400 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-100 dark:border-gray-700 dark:bg-gray-800 dark:text-white dark:placeholder-gray-400 dark:focus:ring-blue-900/50"
+              placeholder="Enter remarks here"
+              rows={2}
+              value={remarks}
+              onChange={(e) => setRemarks(e.target.value)}
             />
           </div>
         </div>
