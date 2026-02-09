@@ -4,11 +4,28 @@ import EcommerceMetrics from "../../components/ecommerce/EcommerceMetrics";
 import MonthlySalesChart from "../../components/ecommerce/MonthlySalesChart";
 import RecentOrders from "../../components/ecommerce/RecentOrders";
 import PageMeta from "../../components/common/PageMeta";
-import { DashboardResponse } from "../../types/dashboard";
+import { DashboardResponse, BranchComparison } from "../../types/dashboard";
 import { useAuth } from "../../context/AuthContext";
+import PaymentHealthCard from "../../components/dashboard/PaymentHealthCard";
+import BookingStatusFunnel from "../../components/dashboard/BookingStatusFunnel";
+import TopTestsTable from "../../components/dashboard/TopTestsTable";
+import TechnicianPerformanceTable from "../../components/dashboard/TechnicianPerformanceTable";
+import BranchComparisonTable from "../../components/dashboard/BranchComparisonTable";
+import RightActionBar from "../../components/dashboard/RightActionBar";
+import Overlay from "../../components/dashboard/Overlay";
+import RightDrawer from "../../components/dashboard/RightDrawer";
+import TechnicianRevenueDonut from "../../components/dashboard/TechnicianRevenueDonut";
+import TopTestsRadialBar from "../../components/dashboard/TopTestsRadialBar";
+import GrowthChart from "../../components/dashboard/GrowthChart";
+import SummaryStatsCard from "../../components/dashboard/SummaryStatsCard";
+import DashboardCard from "../../components/dashboard/DashboardCard";
+import "../../styles/drawer.css";
 
 export default function Home() {
   const [dashboardData, setDashboardData] = useState<DashboardResponse | null>(null);
+  const [selectedBranch, setSelectedBranch] = useState<BranchComparison | null>(null);
+  const [selectedPeriod, setSelectedPeriod] = useState<string>("monthly"); // Default to monthly
+  const [drawerOpen, setDrawerOpen] = useState(false)
   const auth = useAuth();
   const user = auth?.user;
 
@@ -27,7 +44,7 @@ export default function Home() {
   useEffect(() => {
     if (!isAuthorized) return;
 
-    getDashboard()
+    getDashboard(selectedBranch?.branch_id, selectedPeriod)
       .then((res) => {
         setDashboardData(res.data);
         console.log("Dashboard Data", res.data);
@@ -35,7 +52,7 @@ export default function Home() {
       .catch((error) => {
         console.error("Error fetching dashboard data:", error);
       });
-  }, [isAuthorized]);
+  }, [isAuthorized, selectedBranch, selectedPeriod]);
 
   return (
     <>
@@ -43,6 +60,18 @@ export default function Home() {
         title="React.js Ecommerce Dashboard | LMS - React.js Admin Dashboard Template"
         description="This is React.js Ecommerce Dashboard page for LMS - React.js Tailwind CSS Admin Dashboard Template"
       />
+
+      {user?.role === "SUPER_ADMIN" && (
+        <>
+          <RightActionBar onOpen={() => setDrawerOpen(true)} />
+          {drawerOpen && <Overlay onClick={() => setDrawerOpen(false)} />}
+          <RightDrawer
+            open={drawerOpen}
+            onClose={() => setDrawerOpen(false)}
+            onSelectBranch={(branch) => setSelectedBranch(branch)}
+          />
+        </>
+      )}
 
       {!isAuthorized ? (
         <div className="relative min-h-screen flex items-center justify-center">
@@ -87,46 +116,131 @@ export default function Home() {
       ) : (
         <div className="grid grid-cols-12 gap-4 md:gap-6">
           <div className="col-span-12">
-            {dashboardData && <EcommerceMetrics summary={dashboardData.summary} />}
-          </div>
+            <div className="rounded-2xl overflow-hidden shadow-2xl bg-gradient-to-r from-indigo-600 via-blue-600 to-purple-600 text-white p-6 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+              <div>
+                <h1 className="text-2xl md:text-3xl font-extrabold tracking-tight">Dashboard</h1>
+                <p className="text-sm opacity-90 mt-1">Business insights, revenue and performance overview</p>
+              </div>
 
-          <div className="col-span-12 lg:col-span-8">
-            {dashboardData && <MonthlySalesChart chartData={dashboardData.chart} />}
-          </div>
+              <div className="flex flex-wrap items-center gap-3">
+                {/* Date Filter Dropdown */}
+                <div className="relative">
+                  <select
+                    value={selectedPeriod}
+                    onChange={(e) => setSelectedPeriod(e.target.value)}
+                    className="appearance-none bg-white/20 hover:bg-white/30 text-white py-2 pl-4 pr-8 rounded-lg text-sm font-medium border border-white/20 focus:outline-none focus:ring-2 focus:ring-white/50 cursor-pointer transition-colors"
+                    style={{ backgroundImage: `url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%23ffffff' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e")`, backgroundPosition: `right 0.5rem center`, backgroundRepeat: `no-repeat`, backgroundSize: `1.5em 1.5em` }}
+                  >
+                    <option value="daily" className="text-gray-800">Has happened today</option>
+                    <option value="weekly" className="text-gray-800">This Week</option>
+                    <option value="monthly" className="text-gray-800">This Month</option>
+                    <option value="all_time" className="text-gray-800">All Time</option>
+                  </select>
+                </div>
 
-          <div className="col-span-12 lg:col-span-4">
-            <div className="rounded-2xl border border-gray-200 bg-white p-5 dark:border-gray-800 dark:bg-white/[0.03] md:p-6">
-              <h3 className="text-lg font-semibold text-gray-800 dark:text-white/90 mb-4">
-                Summary Stats
-              </h3>
-              <div className="space-y-3">
-                <div className="flex justify-between items-center pb-3 border-b border-gray-100 dark:border-gray-800">
-                  <span className="text-gray-600 dark:text-gray-400">Total Paid</span>
-                  <span className="font-semibold text-gray-800 dark:text-white/90">
-                    {dashboardData && formatCurrency(dashboardData.summary.total_paid)}
-                  </span>
-                </div>
-                <div className="flex justify-between items-center pb-3 border-b border-gray-100 dark:border-gray-800">
-                  <span className="text-gray-600 dark:text-gray-400">Discount Given</span>
-                  <span className="font-semibold text-gray-800 dark:text-white/90">
-                    {dashboardData && formatCurrency(dashboardData.summary.discount_given)}
-                  </span>
-                </div>
-                <div className="flex justify-between items-center pb-3 border-b border-gray-100 dark:border-gray-800">
-                  <span className="text-gray-600 dark:text-gray-400">Net Revenue</span>
-                  <span className="font-semibold text-gray-800 dark:text-white/90">
-                    {dashboardData && formatCurrency(dashboardData.summary.net_revenue)}
-                  </span>
-                </div>
-                <div className="flex justify-between items-center pt-2">
-                  <span className="text-gray-600 dark:text-gray-400">Pending Payments</span>
-                  <span className="font-semibold text-orange-600 dark:text-orange-400">
-                    {dashboardData && dashboardData.summary.pending_payments}
-                  </span>
-                </div>
+                {dashboardData && (
+                  <>
+                    <div className="h-8 w-px bg-white/20 hidden md:block mx-1"></div>
+                    <div className="text-right">
+                      <div className="text-xs text-white/80">Total Paid</div>
+                      <div className="font-semibold text-lg">{formatCurrency(dashboardData.summary.total_paid)}</div>
+                    </div>
+                    <div className="text-right">
+                      <div className="text-xs text-white/80">Net Revenue</div>
+                      <div className="font-semibold text-lg">{formatCurrency(dashboardData.summary.net_revenue)}</div>
+                    </div>
+                  </>
+                )}
               </div>
             </div>
           </div>
+          {selectedBranch && (
+            <div className="col-span-12 flex items-center gap-2">
+              <span className="text-sm text-gray-500 dark:text-gray-400">Viewing Branch:</span>
+              <div className="flex items-center gap-2 bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 px-3 py-1 rounded-full text-sm font-medium">
+                {selectedBranch.branch_name}
+                <button onClick={() => setSelectedBranch(null)} className="hover:text-blue-800 dark:hover:text-blue-300">
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
+                </button>
+              </div>
+            </div>
+          )}
+
+          <div className="col-span-12">
+            {dashboardData && (
+              <EcommerceMetrics summary={dashboardData.summary} />
+            )}
+          </div>
+
+          <div className="col-span-12 lg:col-span-8">
+            {dashboardData && (
+              <GrowthChart chartData={dashboardData.chart} />
+            )}
+          </div>
+
+          {/* Put Payment Health in the previous Bookings & Revenue spot */}
+          <div className="col-span-12 lg:col-span-4 h-100">
+            {dashboardData && dashboardData.payment_health && (
+              <PaymentHealthCard data={dashboardData.payment_health} />
+            )}
+          </div>
+
+          {/* New row: Bookings & Revenue + Top Tests By Revenue side-by-side */}
+          <div className="col-span-12 lg:col-span-6">
+            {dashboardData && (
+              <MonthlySalesChart chartData={dashboardData.chart} />
+            )}
+          </div>
+          <div className="col-span-12 lg:col-span-6">
+            {dashboardData && dashboardData.top_tests && (
+              <TopTestsRadialBar data={dashboardData.top_tests} />
+            )}
+          </div>
+
+          {/* Booking Status Funnel and Top Tests table side-by-side (kept) */}
+          <div className="col-span-12 lg:col-span-6">
+            {dashboardData && dashboardData.booking_funnel && (
+              <BookingStatusFunnel data={dashboardData.booking_funnel} />
+            )}
+          </div>
+
+          <div className="col-span-12 lg:col-span-6">
+            {dashboardData && dashboardData.top_tests && (
+              <TopTestsTable data={dashboardData.top_tests} />
+            )}
+          </div>
+
+          {user?.role === "BRANCH_ADMIN" && (
+            <div className="col-span-12 grid grid-cols-12 gap-4 md:gap-6">
+              <div className="col-span-12 lg:col-span-8">
+                {dashboardData && dashboardData.technician_performance && <TechnicianPerformanceTable data={dashboardData.technician_performance} />}
+              </div>
+              <div className="col-span-12 lg:col-span-4">
+                {dashboardData && dashboardData.technician_performance && <TechnicianRevenueDonut data={dashboardData.technician_performance} />}
+              </div>
+            </div>
+          )}
+
+          {user?.role === "SUPER_ADMIN" && (
+            <>
+              <div className="col-span-12 lg:col-span-8">
+                <BranchComparisonTable />
+              </div>
+              <div className="col-span-12 lg:col-span-4">
+                <DashboardCard title="Summary Stats" className="h-full">
+                  {dashboardData && <SummaryStatsCard summary={dashboardData.summary} />}
+                </DashboardCard>
+              </div>
+            </>
+          )}
+
+          {user?.role === "BRANCH_ADMIN" && (
+            <div className="col-span-12 lg:col-span-4">
+              <DashboardCard title="Summary Stats" className="h-full">
+                {dashboardData && <SummaryStatsCard summary={dashboardData.summary} />}
+              </DashboardCard>
+            </div>
+          )}
 
           <div className="col-span-12">
             {dashboardData && <RecentOrders bookings={dashboardData.recent_bookings} />}

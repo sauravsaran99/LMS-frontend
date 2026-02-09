@@ -1,9 +1,14 @@
-import { useEffect, useState, useRef, useCallback } from "react";
+import React, { useEffect, useState, useRef, useCallback } from "react";
 import toast from "react-hot-toast";
 import PageMeta from "../../components/common/PageMeta";
 import CreatePaymentModal from "./CreatePaymentModal";
 import { getBookingPayments } from "../../api/payment.api";
+import { getTests } from "../../api/test.api";
+import { searchCustomers } from "../../api/customer.api";
 import RefundModal from "./RefundModal";
+import AsyncSelect from "react-select/async";
+import Select from "react-select";
+import debounce from "lodash.debounce";
 
 const Payments = () => {
   const [bookings, setBookings] = useState<any[]>([]);
@@ -18,6 +23,59 @@ const Payments = () => {
   const [selectedBooking, setSelectedBooking] = useState<string | null>(null);
   const [openRefund, setOpenRefund] = useState(false);
   const [refundBooking, setRefundBooking] = useState<any>(null);
+  const [expandedBookings, setExpandedBookings] = useState<Record<string, boolean>>({});
+
+  // Filters
+  const [testOptions, setTestOptions] = useState<{ value: string; label: string }[]>([]);
+  const [selectedTest, setSelectedTest] = useState<{ value: string; label: string } | null>(null);
+  const [selectedCustomer, setSelectedCustomer] = useState<{ value: string; label: string } | null>(
+    null
+  );
+  const [bookingNumber, setBookingNumber] = useState("");
+  const debouncedBookingSearch = useRef(
+    debounce((value) => {
+      setBookingNumber(value);
+    }, 500)
+  ).current;
+
+  // Fetch tests for filter
+  useEffect(() => {
+    const fetchTests = async () => {
+      try {
+        const res = await getTests({ page: 1, limit: 100 }); // Fetch first 100 tests for now
+        if (res.data?.data) {
+          setTestOptions(
+            res.data.data.map((t) => ({
+              value: String(t.id),
+              label: t.name,
+            }))
+          );
+        }
+      } catch (e) {
+        console.error("Failed to load tests", e);
+      }
+    };
+    fetchTests();
+  }, []);
+
+  // Customer Search
+  const loadCustomerOptions = async (inputValue: string) => {
+    if (!inputValue) return [];
+    try {
+      const res = await searchCustomers(inputValue);
+      return res.data?.data.map((c) => ({
+        value: String(c.id),
+        label: `${c.name} (${c.phone})`,
+      }));
+    } catch (e) {
+      console.error("Failed to search customers", e);
+      return [];
+    }
+  };
+
+  const debouncedLoadCustomerOptions = debounce((inputValue, callback) => {
+    loadCustomerOptions(inputValue).then(callback);
+  }, 500);
 
   const load = useCallback(
     async (page: number = 1, isInfinite: boolean = false) => {
@@ -27,14 +85,20 @@ const Payments = () => {
         } else {
           setLoading(true);
         }
-        const res = await getBookingPayments({ page, limit: paymentLimit });
+        const res = await getBookingPayments({
+          page,
+          limit: paymentLimit,
+          test_id: selectedTest?.value,
+          customer_id: selectedCustomer?.value,
+          booking_number: bookingNumber || undefined,
+        });
         console.log("Payments API Response:", res.data);
 
         let newBookings: any[] = [];
         if (Array.isArray(res.data)) {
-          newBookings = res.data;
+          newBookings = res.data
         } else if (res.data?.data && Array.isArray(res.data.data)) {
-          newBookings = res.data.data;
+          newBookings = res.data.data
         }
 
         console.log(`Page ${page}: Got ${newBookings.length} bookings`);
@@ -61,12 +125,12 @@ const Payments = () => {
         }
       }
     },
-    [paymentLimit]
+    [paymentLimit, selectedTest, selectedCustomer, bookingNumber]
   );
 
   useEffect(() => {
     load(1, false);
-  }, [load]);
+  }, [load, selectedTest, selectedCustomer, bookingNumber]);
 
   // Intersection Observer for payments infinite scroll
   useEffect(() => {
@@ -139,6 +203,57 @@ const Payments = () => {
           <p className="text-gray-600 dark:text-gray-400 mt-1">
             Manage and view all booking payment records
           </p>
+        </div>
+
+        {/* Filters */}
+        <div className="flex flex-col md:flex-row gap-4">
+          <div className="w-full md:w-64">
+            <label className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1 block">
+              Booking Number
+            </label>
+            <input
+              type="text"
+              className="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500"
+              placeholder="Search Booking ID..."
+              onChange={(e) => debouncedBookingSearch(e.target.value)}
+            />
+          </div>
+
+          <div className="w-full md:w-64">
+            <label className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1 block">
+              Filter by Test
+            </label>
+            <Select
+              isClearable
+              options={testOptions}
+              value={selectedTest}
+              onChange={(val) => {
+                setSelectedTest(val);
+              }}
+              placeholder="Select Test..."
+              className="react-select-container"
+              classNamePrefix="react-select"
+            />
+          </div>
+
+          <div className="w-full md:w-64">
+            <label className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1 block">
+              Filter by Customer
+            </label>
+            <AsyncSelect
+              isClearable
+              cacheOptions
+              defaultOptions
+              loadOptions={loadCustomerOptions}
+              value={selectedCustomer}
+              onChange={(val) => {
+                setSelectedCustomer(val);
+              }}
+              placeholder="Search Customer..."
+              className="react-select-container"
+              classNamePrefix="react-select"
+            />
+          </div>
         </div>
 
         {/* Loading State */}
@@ -231,12 +346,34 @@ const Payments = () => {
                 </thead>
                 <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
                   {bookings.map((b) => (
-                    <tr
-                      key={b.booking_number}
+                    <React.Fragment key={b.booking_number}>
+                      <tr
                       className="hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors duration-200"
                     >
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div className="flex items-center gap-2">
+                          <button
+                            onClick={() =>
+                              setExpandedBookings((prev) => ({
+                                ...prev,
+                                [b.booking_number]: !prev[b.booking_number],
+                              }))
+                            }
+                            aria-label={expandedBookings[b.booking_number] ? "Collapse payments" : "Expand payments"}
+                            className="flex items-center justify-center w-9 h-9 rounded-lg bg-transparent hover:bg-gray-100 dark:hover:bg-gray-800/40 transition-colors"
+                          >
+                            <svg
+                              className={`w-4 h-4 text-gray-500 dark:text-gray-300 transform transition-transform ${
+                                expandedBookings[b.booking_number] ? "rotate-90" : "rotate-0"
+                              }`}
+                              viewBox="0 0 24 24"
+                              fill="none"
+                              stroke="currentColor"
+                            >
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                            </svg>
+                          </button>
+
                           <div className="flex items-center justify-center w-9 h-9 rounded-lg bg-blue-100 dark:bg-blue-900/30">
                             <span className="text-sm font-semibold text-blue-600 dark:text-blue-400">
                               {b.booking_number.charAt(0)}
@@ -328,7 +465,54 @@ const Payments = () => {
                           )}
                         </div>
                       </td>
-                    </tr>
+                      </tr>
+                      {expandedBookings[b.booking_number] && (
+                      <tr
+                        key={`${b.booking_number}-payments`}
+                        className="bg-gray-50 dark:bg-gray-900/20"
+                      >
+                        <td colSpan={6} className="px-6 py-4">
+                          <div className="rounded-lg border border-gray-100 dark:border-gray-800 p-3 bg-white dark:bg-gray-800">
+                            <div className="text-sm text-gray-600 dark:text-gray-300 font-medium mb-2">
+                              Payments for {b.booking_number}
+                            </div>
+                            <div className="overflow-x-auto">
+                              <table className="w-full text-sm">
+                                <thead>
+                                  <tr className="text-left text-xs text-gray-500 dark:text-gray-400 uppercase">
+                                    <th className="py-2 pr-4">#</th>
+                                    <th className="py-2 pr-4">Amount</th>
+                                    <th className="py-2 pr-4">Mode</th>
+                                    <th className="py-2 pr-4">Collected By</th>
+                                    <th className="py-2 pr-4">Date</th>
+                                  </tr>
+                                </thead>
+                                <tbody className="divide-y divide-gray-100 dark:divide-gray-700">
+                                  {Array.isArray(b.payments) && b.payments.length > 0 ? (
+                                    b.payments.map((p: any, idx: number) => (
+                                      <tr key={p.id || idx} className="py-2">
+                                        <td className="py-2 pr-4 text-gray-800 dark:text-gray-100">{p.id}</td>
+                                        <td className="py-2 pr-4 text-gray-800 dark:text-gray-100">₹{Number(p.amount).toLocaleString("en-IN")}</td>
+                                        <td className="py-2 pr-4 text-gray-600 dark:text-gray-300">{p.payment_mode}</td>
+                                        <td className="py-2 pr-4 text-gray-600 dark:text-gray-300">{p.collected_by_role}</td>
+                                        <td className="py-2 pr-4 text-gray-600 dark:text-gray-300">{p.payment_date ? new Date(p.payment_date).toLocaleString("en-IN") : "-"}</td>
+                                      </tr>
+                                    ))
+                                  ) : (
+                                    <tr>
+                                      <td colSpan={5} className="py-2 text-gray-500 dark:text-gray-400">
+                                        No payments recorded for this booking.
+                                      </td>
+                                    </tr>
+                                  )}
+                                </tbody>
+                              </table>
+                            </div>
+                          </div>
+                        </td>
+                      </tr>
+                      )}
+                    </React.Fragment>
                   ))}
                 </tbody>
               </table>

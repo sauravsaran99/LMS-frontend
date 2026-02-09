@@ -11,5 +11,10 @@ export const refundPayment = (paymentId: number) => api.post(`/payments/${paymen
 
 export const getPayments = () => api.get("/payments");
 
-export const getBookingPayments = (params?: { page?: number; limit?: number }) =>
-  api.get("/payments/bookings", { params });
+export const getBookingPayments = (params?: {
+  page?: number;
+  limit?: number;
+  test_id?: string;
+  customer_id?: string;
+  booking_number?: string;
+}) => api.get("/payments/bookings", { params });

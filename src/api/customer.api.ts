@@ -1,21 +1,19 @@
 import api from "./axios";
 import { Customer } from "../types/customer";
 
-export const searchCustomers = (q: string) => api.get<Customer[]>(`/customers/search?q=${q}`);
+export const searchCustomers = (q: string, myBranchOnly?: boolean) =>
+  api.get<{ data: Customer[]; total: number }>(`/customers/search`, { params: { q, myBranchOnly } });
 
-export const createCustomer = (payload: {
-  name: string;
-  phone: string;
-  age?: number;
-  gender?: string;
-  address?: string;
-  base_branch_id?: number;
-}) => api.post("/customers", payload);
+export const createCustomer = (payload: FormData) => api.post("/customers", payload, {
+  headers: { "Content-Type": "multipart/form-data" },
+});
 
-export const getCustomers = (params?: { page?: number; limit?: number }) =>
+export const getCustomers = (params?: { page?: number; limit?: number; myBranchOnly?: boolean }) =>
   api.get("/customers", { params });
 
-export const updateCustomer = (id: number, data: any) => api.put(`/customers/${id}`, data);
+export const updateCustomer = (id: number, data: FormData) => api.put(`/customers/${id}`, data, {
+  headers: { "Content-Type": "multipart/form-data" },
+});
 
 export const toggleCustomerStatus = (id: number) => api.patch(`/customers/${id}/status`);
 
