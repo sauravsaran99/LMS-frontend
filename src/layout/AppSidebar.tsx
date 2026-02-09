@@ -120,7 +120,7 @@ const navItems: NavItem[] = [
     icon: <PlugInIcon />,
     name: "Payments",
     path: "/payments",
-    roles: ["RECEPTIONIST", "TECHNICIAN"],
+    roles: ["RECEPTIONIST", "TECHNICIAN", "SUPER_ADMIN", "BRANCH_ADMIN"],
   },
   {
     icon: <ListIcon />,
@@ -192,8 +192,11 @@ const AppSidebar: React.FC = () => {
     type: "main" | "others";
     index: number;
   } | null>(null);
+
   const [subMenuHeight, setSubMenuHeight] = useState<Record<string, number>>({});
   const subMenuRefs = useRef<Record<string, HTMLDivElement | null>>({});
+
+  console.log('subMenuHeight', subMenuHeight)
 
   // const isActive = (path: string) => location.pathname === path;
   const isActive = useCallback((path: string) => location.pathname === path, [location.pathname]);

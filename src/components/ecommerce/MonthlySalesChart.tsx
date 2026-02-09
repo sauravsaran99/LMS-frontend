@@ -5,6 +5,7 @@ import { DropdownItem } from "../ui/dropdown/DropdownItem";
 import { MoreDotIcon } from "../../icons";
 import { useState } from "react";
 import { ChartData } from "../../types/dashboard";
+import DashboardCard from "../dashboard/DashboardCard";
 
 interface MonthlySalesChartProps {
   chartData: ChartData;
@@ -101,14 +102,14 @@ export default function MonthlySalesChart({ chartData }: MonthlySalesChartProps)
   function closeDropdown() {
     setIsOpen(false);
   }
-  return (
-    <div className="overflow-hidden rounded-2xl border border-gray-200 bg-white px-5 pt-5 dark:border-gray-800 dark:bg-white/[0.03] sm:px-6 sm:pt-6">
-      <div className="flex items-center justify-between">
-        <h3 className="text-lg font-semibold text-gray-800 dark:text-white/90">
-          Bookings & Revenue
-        </h3>
+    return (
+    <DashboardCard
+      title="Bookings & Revenue"
+      subtitle="Monthly trend and comparison"
+      className="h-full"
+      action={
         <div className="relative inline-block">
-          <button className="dropdown-toggle" onClick={toggleDropdown}>
+          <button className="dropdown-toggle p-2 rounded-md hover:bg-gray-100 dark:hover:bg-white/5" onClick={toggleDropdown}>
             <MoreDotIcon className="text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 size-6" />
           </button>
           <Dropdown isOpen={isOpen} onClose={closeDropdown} className="w-40 p-2">
@@ -126,13 +127,15 @@ export default function MonthlySalesChart({ chartData }: MonthlySalesChartProps)
             </DropdownItem>
           </Dropdown>
         </div>
-      </div>
-
+      }
+    >
       <div className="max-w-full overflow-x-auto custom-scrollbar">
         <div className="-ml-5 min-w-[650px] xl:min-w-full pl-2">
-          <Chart options={options} series={series} type="bar" height={180} />
+          <div className="min-h-[260px]">
+            <Chart options={options} series={series} type="bar" height={260} />
+          </div>
         </div>
       </div>
-    </div>
+    </DashboardCard>
   );
 }
